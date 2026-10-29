@@ -1,0 +1,69 @@
+packages <- c(
+  "tidyverse",
+  "data.table",
+  "janitor",
+  "scales",
+  "patchwork",
+  "fixest",
+  "sandwich",
+  "lmtest",
+  "car",
+  "AER",
+  "ivreg",
+  "forecast",
+  "tseries",
+  "zoo",
+  "vars",
+  "mgcv",
+  "splines",
+  "glmnet",
+  "mlr3",
+  "mlr3verse",
+  "mlr3tuning",
+  "randomForest",
+  "xgboost",
+  "lightgbm",
+  "stargazer",
+  "gtsummary",
+  "gt",
+  "furrr",
+  "here",
+  "devtools",
+  "renv",
+  "IRkernel"
+)
+#for(package in packages) renv::install(package, prompt = F)
+
+library(tidyverse)
+library(data.table)
+library(janitor)
+library(scales)
+library(patchwork)
+library(fixest)
+library(sandwich)
+library(lmtest)
+library(car)
+library(AER)
+library(ivreg)
+library(forecast)
+library(tseries)
+library(zoo)
+library(vars)
+library(mgcv)
+library(splines)
+library(glmnet)
+library(mlr3)
+library(mlr3verse)
+library(mlr3tuning)
+library(randomForest)
+library(xgboost)
+library(lightgbm)
+library(stargazer)
+library(gtsummary)
+library(gt)
+library(furrr)
+library(here)
+library(devtools)
+library(renv)
+library(IRkernel)
+
