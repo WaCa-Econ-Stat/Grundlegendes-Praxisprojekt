@@ -1,0 +1,80 @@
+variable,definition
+region_name,World Bank region name
+region_code,Three-letter World Bank abbreviation of world regions
+year,Year
+country_name,World Bank country name
+country_code,Three-letter ISO (alpha-3) country code system for international stardardization
+reporting_level,Reporting level
+survey_acronym,Country survey acronym
+survey_coverage,"Geographic coverage of the country survey (i.e. national, urban, etc.)"
+welfare_time,Welfare time
+welfare_type,Type of welfare vector used for estimates (income or consumption expenditure)
+survey_time,Time of survey in the field
+survey_comparability,"Series comparability code where zero(0) is oldest comparable series in each country. When comparability is broken, the value changes to one (1) and so on"
+comparable_spell,Comparability over time at country level
+poverty_line,Minimum value representing the basic necessities an individual requires to live (per day)
+headcount,Proportion (%) of the population that live in households where the consumption or income per person is below the poverty line
+poverty_gap,"Measures the ""intensity"" or ""depth"" of poverty, showing the average shortfall of the total population from the poverty line"
+poverty_severity,Averages the squares of the poverty gaps relative to the poverty line
+watts,"A distribution-sensitive poverty measure computed by dividing the poverty line by income (or consumption), taking logs, and taking the sum over the poor"
+mean,The average daily household per capita income or consumption expenditure from the survey in 2021 PPP
+median,The median of daily household per capita income or consumption expenditure from the survey in 2021 PPP
+mld,"Mean Log Deviation. Index of inequality, given by the mean across the population of the log of the overall mean divided by individual income"
+gini,Measure of inequality between 0 (everyone has the same income) and 100 (richest person has all the income)
+polarization,"Also known as the Wolfson polarization index, it measures the extent to which the distribution of welfare is ""spread out"". It ranges from 0 (no polarization) to 1 (complete polarization)"
+decile1,Income or Consumption share held by lowest/1st decile (%)
+decile2,Income or Consumption share held by the second/2nd decile (%)
+decile3,Income or Consumption share held by the third/3rd decile (%)
+decile4,Income or Consumption share held by the fourth decile (%)
+decile5,Income or Consumption share held by the fifth/5th decile (%)
+decile6,Income or Consumption share held by the 6th decile (%)
+decile7,Income or Consumption share held by the 7th decile (%)
+decile8,Income or Consumption share held by the 8th decile (%)
+decile9,Income or Consumption share held by the 9th decile (%)
+decile10,Income or Consumption share held by the highest/10th decile (%)
+cpi,Consumer Price Index
+ppp,Purchasing Power Parity (International Comparison Program - ICP 2021)
+population,Total population in year
+gdp,Gross Domestic Product
+hfce,Household Final Consumption Expenditure
+is_interpolated,"1 if data for that year is interpolated for global estimates purposes, 0 if it's a survey year"
+distribution_type,"Underlying distribution of welfare (aggretate, grouped, imputed, synthetic or micro data)"
+pop_in_poverty,Population in poverty
+spl,Societal Poverty Line
+spr,Societal Poverty Rate. Poverty headcount ratio at societal poverty line (% of population)
+pg,Prosperity Gap. Average factor by which incomes fall short of the prosperity threshold
+estimate_type,"Whether reported estimate is actual, projection, or nowcast"
+headcount_ipl,Proportion (%) of the population living below the international poverty line (IPL)
+headcount_lmicpl,Proportion (%) of the population living below the lower-middle income poverty line (LMIPL)
+headcount_umicpl,Proportion (%) of the population living below the upper-middle income poverty line (UMIPL)
+headcount_national,Proportion (%) of the population living below the official national poverty line
+theil,"Theil index. Entropy-based inequality measure capturing how far the actual distribution deviates from perfect equality. It ranges from zero to infinity, where zero with zero representing an equal distribution and higher values representing a higher level of inequality"
+share_b40_female,Proportion (%) of the female population in the Bottom 40 percent of the income or consumtion distribution
+share_t60_female,Proportion (%) of the female population in the Top 60 percent of the income or consumtion distribution
+share_b40_male,Proportion (%) of the male population in the Bottom 40 percent of the income or consumtion distribution
+share_t60_male,Proportion (%) of the male population in the Top 60 percent of the income or consumtion distribution
+share_b40_rural,Proportion (%) of the rural population in the Bottom 40 percent of the income or consumtion distribution
+share_t60_rural,Proportion (%) of the rural population in the Top 60 percent of the income or consumtion distribution
+share_b40_urban,Proportion (%) of the urban population in the Bottom 40 percent of the income or consumtion distribution
+share_t60_urban,Proportion (%) of the urban population in the Top 60 percent of the income or consumtion distribution
+share_b40agecat_0_14,Proportion (%) of the population 0-14 years old in the Bottom 40 percent of the income or consumtion distribution
+share_t60agecat_0_14,Proportion (%) of the population 0-14 years old in the Top 60 percent of the income or consumtion distribution
+share_b40agecat_15_64,Proportion (%) of the population 15-64 years old in the Bottom 40 percent of the income or consumtion distribution
+share_t60agecat_15_64,Proportion (%) of the population 15-64 years old in the Top 60 percent of the income or consumtion distribution
+share_b40agecat_65p,Proportion (%) of the population 65+ years old in the Bottom 40 percent of the income or consumtion distribution
+share_t60agecat_65p,Proportion (%) of the population 65+ years old in the Top 60 percent of the income or consumtion distribution
+share_b40edu_noedu,Proportion (%) of the population with no education in the Bottom 40 percent of the income or consumtion distribution
+share_t60edu_noedu,Proportion (%) of the population with no education in the Top 60 percent of the income or consumtion distribution
+share_b40edu_pri,Proportion (%) of the population with primary education in the Bottom 40 percent of the income or consumtion distribution
+share_t60edu_pri,Proportion (%) of the population with primary education in the Top 60 percent of the income or consumtion distribution
+share_b40edu_sec,Proportion (%) of the population with secondary education in the Bottom 40 percent of the income or consumtion distribution
+share_t60edu_sec,Proportion (%) of the population with secondary education in the Top 60 percent of the income or consumtion distribution
+share_b40edu_ter,Proportion (%) of the population with tertiary education in the Bottom 40 percent of the income or consumtion distribution
+share_t60edu_ter,Proportion (%) of the population with tertiary education in the Top 60 percent of the income or consumtion distribution
+mpm_education_attainment,"Multidimensional poverty, Educational attainment (% of population deprived)"
+mpm_education_enrollment,"Multidimensional poverty, Educational enrollment (% of population deprived)"
+mpm_electricity,"Multidimensional poverty, Electricity (% of population deprived)"
+mpm_sanitation,"Multidimensional poverty, Sanitation (% of population deprived)"
+mpm_water,"Multidimensional poverty, Drinking water (% of population deprived)"
+mpm_monetary,"Multidimensional poverty, Monetary poverty (% of population deprived)"
+mpm_headcount,"Multidimensional poverty, Headcount ratio (% of population)"
