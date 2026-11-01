@@ -30,7 +30,8 @@ packages <- c(
   "here",
   "devtools",
   "renv",
-  "IRkernel"
+  "IRkernel",
+  "ggrepel"
 )
 #for(package in packages) renv::install(package, prompt = F)
 
@@ -66,4 +67,5 @@ library(here)
 library(devtools)
 library(renv)
 library(IRkernel)
+library(ggrepel)
 
