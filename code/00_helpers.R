@@ -41,6 +41,32 @@ source_caption <- function(config) {
   config$source_note
 }
 
+open_png_device <- function(filename, width, height, units = "in", res = 300,
+                            pointsize = 12, bg = "white", ...) {
+  previous_device <- grDevices::dev.cur()
+  if (identical(Sys.info()[["sysname"]], "Darwin")) {
+    # Quartz uses macOS graphics directly and does not require XQuartz.
+    if (isTRUE(capabilities("aqua", Xchk = FALSE))) {
+      grDevices::png(filename, width = width, height = height, units = units,
+                     res = res, pointsize = pointsize, bg = bg, type = "quartz", ...)
+    } else if (requireNamespace("ragg", quietly = TRUE)) {
+      ragg::agg_png(filename, width = width, height = height, units = units,
+                     res = res, pointsize = pointsize, background = bg, ...)
+    } else {
+      stop("PNG export needs Quartz support in macOS R or the 'ragg' package. ",
+           "Install ragg with install.packages('ragg') and run the pipeline again.", call. = FALSE)
+    }
+  } else {
+    grDevices::png(filename, width = width, height = height, units = units,
+                   res = res, pointsize = pointsize, bg = bg, type = "cairo", ...)
+  }
+  if (identical(grDevices::dev.cur(), previous_device)) {
+    stop("The PNG graphics device could not be started. Check the graphics libraries in this R installation.",
+         call. = FALSE)
+  }
+  invisible(grDevices::dev.cur())
+}
+
 export_figure <- function(plot, name, slide, version, config,
                           width = 16, height = 9, dpi = 300, note = "",
                           supplement = FALSE) {
@@ -55,9 +81,11 @@ export_figure <- function(plot, name, slide, version, config,
   temporary_png <- tempfile("poverty-figure-", fileext = ".png")
   on.exit(unlink(temporary_png), add = TRUE)
   if (is.function(plot)) {
-    grDevices::png(temporary_png, width = width, height = height,
-                   units = "in", res = dpi, pointsize = 12, type = "cairo", bg = "white")
-    device <- grDevices::dev.cur()
+    device <- open_png_device(temporary_png, width = width, height = height,
+                              units = "in", res = dpi, pointsize = 12, bg = "white")
+    if (is.null(device) || !device %in% grDevices::dev.list()) {
+      stop("The PNG graphics device could not be started.", call. = FALSE)
+    }
     tryCatch(plot(), finally = {
       if (device %in% grDevices::dev.list()) grDevices::dev.off(device)
     })
@@ -66,7 +94,12 @@ export_figure <- function(plot, name, slide, version, config,
     plot <- plot + ggplot2::labs(title = NULL, subtitle = NULL) +
       ggplot2::theme(plot.title = ggplot2::element_blank(), plot.subtitle = ggplot2::element_blank())
     ggplot2::ggsave(temporary_png, plot, width = width, height = height,
-                    dpi = dpi, bg = "white")
+                    dpi = dpi, bg = "white",
+                    device = if (identical(Sys.info()[["sysname"]], "Darwin")) open_png_device else NULL)
+  }
+  if (!file.exists(temporary_png) || is.na(file.size(temporary_png)) || file.size(temporary_png) == 0) {
+    stop("The PNG renderer did not create an image for ", name,
+         ". Check the graphics libraries in this R installation.", call. = FALSE)
   }
 
   # Cloud synchronization or an image viewer may briefly hold the destination open.
