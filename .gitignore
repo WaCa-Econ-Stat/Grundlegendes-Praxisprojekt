@@ -2,3 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rlibrary/
+data_clean/
+output/
+.quarto/
+*.Rout

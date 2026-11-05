@@ -1,7 +1,0 @@
-#Sub-Sah -> Sudan (2009->2016) (45% -> 77%)
-#South Asia -> Nepal (1995->2022) (71% -> 2%)
-#ME -> Yemen (1998->2014) (14% -> 33%), Pakistan (1987->2024) (80% -> 20%)
-#Latin -> Peru (1985->1994) (6% -> 26%)
-#Europe -> Uzbekistan (1998->2003) (80% -> 93%), Tajikistan (1999->2024) (79% -> 6%)
-#East -> China (1990->2022) (83% -> 0%), Indonesia (1984->2025) (86% -> 4%) (Myanmar / Solomon Islands only 2 and 7 years)
-#East -> Micronesia (2005->2013) (16% -> 26%)
