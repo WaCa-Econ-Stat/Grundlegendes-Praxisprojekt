@@ -2,13 +2,17 @@
 
 ## Daten und Einheiten
 
-Die Eingaben stammen vollständig aus `data/`. Die Pipeline lädt keine neuen Armutsdaten. Sie zeichnet ihre MD5-Prüfsummen auf. Nationale Quoten stehen in PIP als Anteile zwischen 0 und 1 und werden mit 100 in Prozent umgerechnet. OWID-Quoten liegen bereits in Prozent vor. Eine Veränderung der Quote heißt Prozentpunktveränderung.
+Die Eingaben stammen vollständig aus `data/`. Die Pipeline lädt keine neuen Armutsdaten. Sie zeichnet die MD5-Prüfsummen aller vier verwendeten Eingaben auf. Die gemeinsame Aufbereitung `R/01_data_prep.R` ist unverändert aus `roterFaden` (Stand `cb83cb8`) übernommen. Sie erzeugt nationale Erhebungen (`surveys.rds`), modellierte Aggregate (`aggregates.rds`) und chinesische Stadt-/Landdaten (`china.rds`) getrennt. Die Stadt-/Landdaten gehen nicht in nationale Vergleiche ein.
+
+Nationale Quoten stehen in PIP als Anteile zwischen 0 und 1 (`headcount`). `pct_below_3` enthält für OWID-ausgewählte Erhebungen die bereits in Prozent vorliegende OWID-Quote, für die übrigen Erhebungen `100 * headcount`. Die Abweichung zwischen OWID und umgerechnetem PIP-Wert muss kleiner als 0,0001 Prozentpunkte sein. `poverty_pct` in der anschließenden Analyse ist ein Alias für `pct_below_3`. Eine Veränderung der Quote heißt Prozentpunktveränderung. Weitere Armutsgrenzen liegen bei nationalen Erhebungen nur für die OWID-ausgewählten Zeilen vor.
+
+Kindersterblichkeit wird über Länderkennung und Jahr ergänzt und bezeichnet Todesfälle vor dem fünften Geburtstag je 100 Lebendgeburten. Unter den Aggregaten erhält ausschließlich die Weltreihe diese Variable: Die in der Sterblichkeitsdatei verwendeten geografischen Gruppen entsprechen nicht den Weltbankregionen. Diese ergänzten Daten werden vorgehalten; die bisherigen Grafiken verwenden weiterhin Armutsquoten.
 
 Welt und Regionen verwenden die veröffentlichten, modellierten OWID/Weltbank-Aggregate. Nationale Erhebungen werden nicht ungewichtet zu Regionalwerten gemittelt. Der dargestellte Zeitraum 1990–2024 macht die Aggregate nicht zu direkten jährlichen Erhebungen. Prognosejahre 2025 und 2026 bleiben außerhalb des Hauptzeitraums.
 
 ## OWID-Auswahl
 
-PIP kann für ein Land und Jahr sowohl Einkommen als auch Konsum enthalten. Die OWID-Länderreihe wählt jeweils einen Wert. Die Zuordnung verwendet Länderkennung, Jahr und die Übereinstimmung der 3-Dollar-Quote. Mehrdeutige oder fehlende Zuordnungen brechen den Lauf ab. Die Datenaufbereitung mittelt die beiden Methoden nicht.
+PIP kann für ein Land und Jahr sowohl Einkommen als auch Konsum enthalten. Die OWID-Länderreihe wählt jeweils einen Wert. Die gemeinsame Aufbereitung verwendet Länderkennung, Jahr und die Übereinstimmung der 3-Dollar-Quote für die Zuordnung. Mehrdeutige oder fehlende Zuordnungen brechen den Lauf ab. Die Analyse übernimmt anschließend ausschließlich das Kennzeichen `owid_selected`, ohne erneut zuzuordnen. Alle nationalen PIP-Erhebungen bleiben im Grunddatensatz erhalten, auch die nicht durch OWID ausgewählten. Die Datenaufbereitung mittelt die beiden Methoden nicht. Ländernamen folgen vorrangig OWID, Länderkennungen bleiben die Verknüpfungsschlüssel.
 
 ## Ländervergleich
 
@@ -36,7 +40,7 @@ Für jedes im nationalen PIP-Datensatz vertretene Land wird das jüngste Erhebun
 
 ## Einkommen und Konsum
 
-Die Paarbildung verwendet Länderkennung und Berichtsjahr. Es werden nur nationale Erhebungen mit 3-Dollar-Grenze und Jahren 1990–2024 verglichen. Die Differenz lautet `100 * (headcount_income - headcount_consumption)`.
+Die Paarbildung verwendet Länderkennung und Berichtsjahr. Es werden nur nationale Erhebungen mit 3-Dollar-Grenze und Jahren 1990–2024 verglichen. Die Differenz lautet `pct_below_3_income - pct_below_3_consumption` in Prozentpunkten. Sie entspricht bis auf die genannte Rundung `100 * (headcount_income - headcount_consumption)`.
 
 Positive Werte bedeuten eine höhere einkommensbasierte Quote, negative eine höhere konsumbasierte Quote. Das Diagramm zeigt einen Balken für den Median der gepaarten Jahresdifferenzen je Land. Es ist der Median der Differenzen und nicht die Differenz zweier getrennt berechneter Mediane. n nennt die Anzahl verfügbarer Vergleichsjahre. Die Einzelpaare bleiben in `method_pairs.csv` erhalten. Das Diagramm enthält keine Konfidenzintervalle und behauptet keine statistische Unabhängigkeit wiederholter Jahre.
 

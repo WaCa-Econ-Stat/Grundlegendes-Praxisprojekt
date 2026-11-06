@@ -48,6 +48,57 @@ check(!pairs$same_survey_acronym && pairs$same_survey_year, "Different surveys r
 
 if (!file.exists("data_clean/analysis_data.rds")) stop("First run source('run_all.R').")
 a <- readRDS("data_clean/analysis_data.rds")
+surveys <- readRDS("data_clean/surveys.rds")
+aggregates <- readRDS("data_clean/aggregates.rds")
+china <- readRDS("data_clean/china.rds")
+survey_key <- c("country_code", "year", "welfare_type")
+check(!anyDuplicated(surveys, by = survey_key) && !anyDuplicated(aggregates, by = c("region_name", "year")),
+      "Shared survey and aggregate keys are unique")
+raw_pip <- fread("data/worldbank_pip.csv")
+setnames(raw_pip, "reporting_year", "year")
+check(fsetequal(surveys[, ..survey_key], raw_pip[reporting_level == "national", ..survey_key]),
+      "Every national PIP survey is retained, including those not selected by OWID")
+check(isTRUE(all.equal(a$surveys_all, surveys)) && isTRUE(all.equal(a$aggregates, aggregates)) &&
+        isTRUE(all.equal(a$china, china)), "The analysis retains all three unchanged shared datasets")
+canonical_period <- copy(surveys[year >= config$start_year & year <= config$end_year])
+setorder(canonical_period, country_code, welfare_type, year)
+canonical_columns <- names(surveys)
+check(isTRUE(all.equal(as.data.frame(a$surveys[, ..canonical_columns]), as.data.frame(canonical_period))) &&
+        identical(a$surveys$poverty_pct, canonical_period$pct_below_3),
+      "The adapter only filters national data and aliases the canonical poverty percentage")
+check(fsetequal(a$selected[, ..survey_key], canonical_period[owid_selected == TRUE, ..survey_key]),
+      "The analysis uses the shared OWID selection directly")
+other_thresholds <- setdiff(grep("^pct_below_", names(surveys), value = TRUE), "pct_below_3")
+check(any(!surveys$owid_selected) &&
+        all(abs(surveys$pct_below_3 - 100 * surveys$headcount) < 1e-4) &&
+        all(is.na(as.matrix(surveys[owid_selected == FALSE, ..other_thresholds]))) &&
+        !anyNA(surveys[owid_selected == TRUE, ..other_thresholds]),
+      "Percentage units and the availability of additional poverty thresholds remain intact")
+check(identical(aggregates$is_projection, aggregates$year > 2024L) &&
+        all(c("world", "region", "other") %in% aggregates$type) &&
+        !any(a$world$is_projection) && !any(a$regional$is_projection),
+      "Full aggregates retain projection flags while the default analysis ends in 2024")
+for (table in list(a$world, a$regional)) {
+  check(identical(table$below_3, table$pct_below_3), "Aggregate plotting aliases preserve canonical values")
+}
+china_key <- c("country_code", "reporting_level", "year", "welfare_type")
+check(!anyDuplicated(china, by = china_key) &&
+        fsetequal(china[, ..china_key], raw_pip[country_code == "CHN" & reporting_level != "national", ..china_key]) &&
+        setequal(china$reporting_level, c("urban", "rural")) && any(surveys$country_code == "CHN"),
+      "Chinese urban and rural surveys are separate from the retained national series")
+raw_cm <- fread("data/owid_child_mortality.csv")
+raw_cm <- raw_cm[code != ""]
+raw_cm[code == "OWID_KOS", code := "XKX"]
+expected_cm <- raw_cm[surveys, on = .(code = country_code, year), child_mortality_rate]
+check(isTRUE(all.equal(surveys$child_mortality, expected_cm)),
+      "National child mortality matches the source by country and year without rescaling")
+world_cm <- raw_cm[entity == "World"][aggregates[type == "world"], on = "year", child_mortality_rate]
+check(isTRUE(all.equal(aggregates[type == "world", child_mortality], world_cm)) &&
+        all(is.na(aggregates[type != "world", child_mortality])),
+      "World mortality matches the source and incompatible regional definitions remain unjoined")
+check(setequal(a$checksums$file, file.path("data", c("owid_poverty_lines.csv", "worldbank_pip.csv",
+                                                    "owid_country_codes.csv", "owid_child_mortality.csv"))),
+      "Checksums cover all four shared inputs")
 check(!anyDuplicated(a$countries$country_code), "One point per country")
 check(all(a$countries$span >= config$min_span & a$countries$n_surveys >= config$min_surveys), "All included series meet the interval and coverage rules")
 check(nrow(a$coverage) == nrow(a$catalog) && !anyDuplicated(a$coverage$country_code), "Each catalog country counts once in method coverage")

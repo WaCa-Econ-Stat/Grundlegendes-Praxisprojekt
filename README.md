@@ -32,6 +32,16 @@ Im Terminal funktioniert `Rscript --vanilla run_all.R`. Das Skript findet den Pr
 
 Generierte Ergebnisse und Paketbibliotheken sind in Git ausgeschlossen. Sie entstehen erneut mit `run_all.R`. Die Quelldaten bleiben unverändert und werden beim Ausführen nicht aus dem Internet aktualisiert.
 
+## Gemeinsame Datenaufbereitung
+
+Die Datenaufbereitung kommt unverändert aus `roterFaden`, Stand `cb83cb8` (`R/01_data_prep.R`). Sie erzeugt drei getrennte Grundlagen:
+
+- `data_clean/surveys.rds`: nationale Erhebungen mit Einkommens-/Konsummethode, OWID-Auswahl, Armutsquoten und Kindersterblichkeit.
+- `data_clean/aggregates.rds`: modellierte Welt- und Regionalreihen sowie weitere Aggregate; Prognosejahre sind gekennzeichnet.
+- `data_clean/china.rds`: getrennte Stadt-/Landdaten für China. Sie werden aufbewahrt und gehen nicht in unsere nationalen Ländervergleiche ein.
+
+`code/01_prepare_data.R` führt diese gemeinsame Aufbereitung aus und stellt anschließend den Analysezeitraum, deutsche Regionsbeschriftungen und die bisherigen Spaltennamen für die Grafiken bereit. Die OWID-Auswahl wird direkt aus `owid_selected` übernommen. Es gibt keine zweite Zuordnung von OWID und PIP. Alle drei vollständigen Grunddatensätze bleiben erhalten; `prepared_data.rds` und `analysis_data.rds` sind daraus abgeleitete Analyseobjekte. Details und Herkunft stehen in `R/README.md`.
+
 ## Grafiken
 
 | Datei | Inhalt |
@@ -61,10 +71,13 @@ Das erzeugt die sechs Kerngrafiken und einen dazu passenden Bericht. Bereits erz
 ## Projektstruktur
 
 ```text
+R/
+  01_data_prep.R             Unveränderte gemeinsame Aufbereitung aus roterFaden
+  README.md                  Herkunft, Datensätze und Einheiten
 code/
   00_setup.R                 Einstellungen, Bibliotheken und Regionszuordnung
   00_helpers.R               Prüfungen, Beschriftung und Grafikexport
-  01_prepare_data.R          Quelldaten und eindeutige OWID/PIP-Zuordnung
+  01_prepare_data.R          Aufbereitung ausführen und Analyse anschließen
   02_build_analysis_data.R   Länderreihen, Fallauswahl, Erhebungsarten und Paare
   03_make_figures.R          Grafiken
   04_build_report.R          Bericht und Ergebnisübersicht
@@ -76,7 +89,7 @@ run_all.R                   Einstiegspunkt
 renv.lock                   Aufgezeichnete Paketversionen
 ```
 
-Die nicht verwendeten weiteren Kursdaten bleiben als Quellenmaterial erhalten. Die alten Analyseskripte liegen im ursprünglichen Stand von `main`. Der Neubau erfolgt auf `codex/neustart-armutsanalyse`.
+Die weiteren Kursdaten bleiben als Quellenmaterial erhalten. Die alten Analyseskripte liegen im ursprünglichen Stand von `main`. Der Neubau erfolgt auf `codex/neustart-armutsanalyse`.
 
 ## Prüfen
 
@@ -86,7 +99,7 @@ Nach einem vollständigen Lauf:
 source("tests/run_checks.R")
 ```
 
-Die Prüfungen verwenden künstliche Problemfälle für Zeitfenster, Nullquoten, Vergleichbarkeitsbrüche, Methodenwahl und Paarbildung. Anschließend prüfen sie die tatsächlich erzeugten Daten, Abbildungen und Eingabeprüfsummen.
+Die Prüfungen verwenden künstliche Problemfälle für Zeitfenster, Nullquoten, Vergleichbarkeitsbrüche, Methodenwahl und Paarbildung. Anschließend prüfen sie die Übernahme der gemeinsamen Datensätze, die Trennung der Beobachtungsebenen, Einheiten, OWID-Auswahl, Kindersterblichkeit, erzeugte Abbildungen und Eingabeprüfsummen.
 
 ## Quellen und Vorlagen
 
