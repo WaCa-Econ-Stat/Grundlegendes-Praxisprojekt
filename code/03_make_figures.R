@@ -227,7 +227,7 @@ make_figures <- function(a, config) {
            "Alle drei Linien gehen über den gesamten Zeitraum zurück. Die höhere Grenze erfasst zugleich einen wesentlich größeren Anteil der Bevölkerung. Der Vergleich konzentriert sich auf die Weltreihe.")
   }
   figures <- c(figures, make_living_conditions_figures(a, config))
-  manifest <- rbindlist(figures)
+  manifest <- rbindlist(figures, fill = TRUE)
   fwrite(manifest, "output/results/figure_manifest.csv", bom = TRUE)
   manifest
 }

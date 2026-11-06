@@ -135,6 +135,26 @@ check(!anyDuplicated(panel, by = c("country_code", "target_year")) &&
         all(panel[, .N, by = country_code]$N == length(config$mortality_years)) &&
         all(panel[, .N, by = target_year]$N == uniqueN(panel$country_code)) && !anyNA(panel$child_mortality),
       "Every mortality time panel contains the same countries with complete matched data")
+membership <- a$mortality_group_membership
+check(!anyDuplicated(membership$country_code) && setequal(membership$country_code, panel$country_code) &&
+        all(membership$poverty_group == ifelse(membership$baseline_poverty_pct >= 30, "high", "lower")),
+      "Mortality groups classify every panel country once using its baseline poverty")
+baseline <- panel[target_year == min(config$mortality_years), .(country_code, year, pct_below_3)]
+joined <- merge(membership, baseline, by = "country_code")
+check(all(joined$baseline_actual_year == joined$year) && all(joined$baseline_poverty_pct == joined$pct_below_3),
+      "Group membership uses the original baseline reporting year and is not reassigned later")
+grouped <- merge(panel, membership[, .(country_code, poverty_group)], by = "country_code")
+expected_groups <- grouped[, .(n = .N, mortality_median = median(child_mortality)), by = .(poverty_group, target_year)]
+actual_groups <- a$mortality_groups[, .(poverty_group, target_year, n, mortality_median)]
+check(fsetequal(actual_groups, expected_groups) && all(actual_groups[, uniqueN(n), by = poverty_group]$V1 == 1L),
+      "Group lines show unweighted country medians with constant country counts")
+focus <- a$mortality_focus
+check(uniqueN(focus$country_code) == 1L && all(focus$country_code %in% a$cases$country_code) &&
+        fsetequal(focus[indicator == "poverty_pct", .(year)], focus[indicator == "child_mortality", .(year)]),
+      "The focused counterexample uses one existing case and identical years for both indicators")
+expected_focus <- a$surveys[focus, on = .(country_code, year, welfare_type)]
+check(all(focus$value == ifelse(focus$indicator == "poverty_pct", expected_focus$poverty_pct, expected_focus$child_mortality)),
+      "Counterexample lines preserve the exact survey and mortality observations")
 case_cm <- a$case_mortality
 check(setequal(case_cm$country_code, a$cases$country_code) &&
         all(case_cm$mortality_change_pp == case_cm$mortality_end - case_cm$mortality_start),
@@ -166,6 +186,17 @@ for (i in seq_len(nrow(a$cases))) {
 current <- unname(tools::md5sum(a$checksums$file))
 check(identical(current, a$checksums$md5), "The input files remain unchanged")
 manifest <- fread("output/results/figure_manifest.csv")
+new_manifest <- manifest[grepl("^(08|09|10|11|12|13)_", figure)]
+check(nrow(new_manifest) == 6L && all(grepl("^https://ourworldindata.org/grapher/", new_manifest$owid_reference)) &&
+        all(nzchar(new_manifest$design_note)), "All six revised figures document a concrete OWID inspiration")
+for (file in c("gdp_bubbles_plot_data", "mortality_bubbles_plot_data")) {
+  bubbles <- fread(file.path("output/tables", paste0(file, ".csv")))
+  expected <- a$indicator_snapshot[bubbles, on = .(country_code, year)]
+  check(!anyDuplicated(bubbles$country_code) && all(bubbles$reporting_pop > 0) &&
+          all(abs(bubbles$reporting_pop - expected$reporting_pop) <= 1e-12 * expected$reporting_pop) &&
+          all(bubbles$region_code == expected$region_code),
+        paste("Population circles retain the source population and World Bank region", file))
+}
 check(nrow(manifest) %in% c(12L, 13L) && all(file.exists(manifest$png)) && all(file.exists(manifest$svg)) &&
         all(paste0(sprintf("%02d", 8:13), c("_bip_und_armut", "_ungleichheit_und_armut", "_kindersterblichkeit_und_armut",
           "_kindersterblichkeit_zeitvergleich", "_kindersterblichkeit_fallbeispiele", "_hoehere_grenze_kindersterblichkeit")) %in% manifest$figure),
@@ -175,4 +206,6 @@ html <- paste(readLines("output/bericht.html", encoding = "UTF-8", warn = FALSE)
 check(length(gregexpr("data:image/png;base64,", html, fixed = TRUE)[[1]]) == nrow(manifest), "The report embeds every current figure for offline use")
 check(grepl("Wirtschaftliche Lebensbedingungen", html, fixed = TRUE) && grepl("Gesundheit und Kindersterblichkeit", html, fixed = TRUE) &&
         grepl("Zusammenhänge und ihre Grenzen", html, fixed = TRUE), "The report includes the living-conditions chapters and interpretation limits")
+check(length(gregexpr("OWID-Vorlage ansehen", html, fixed = TRUE)[[1]]) == 6L,
+      "The report links all six concrete OWID references")
 cat("Passed ", checks, " checks.\n", sep = "")

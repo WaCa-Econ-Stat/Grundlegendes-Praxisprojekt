@@ -11,15 +11,23 @@ Die Darstellung folgt der Aussage, die das Publikum mitnehmen soll. Die Titel ne
 | 5 | Die verfügbare Erhebungsart unterscheidet sich systematisch zwischen den beiden gezeigten Regionen. | Zwei Prozentbalken mit direkter Beschriftung der dominierenden Erhebungsarten. |
 | 6 | In den meisten Vergleichsländern zeigt der Median höhere Einkommensquoten. | Ein beschrifteter Differenzbalken je Land, mit der Zahl verfügbarer Vergleichsjahre. |
 | 7, optional | Der weltweite Rückgang bleibt bei höheren Armutsgrenzen sichtbar. | Drei direkt beschriftete Weltlinien. |
-| 8 | Bei höherem BIP pro Kopf ist extreme Armut meist seltener. | Ein Punkt je Land nahe 2020; BIP auf logarithmischer Achse. Die drei bisherigen Fallbeispiele sind markiert. |
-| 9 | Höhere Ungleichheit geht in beiden Erhebungsarten mit mehr Armut einher. | Zwei Streudiagramme mit gleichen Achsen für Einkommen und Konsum. |
-| 10 | Mehr extreme Armut geht meist mit höherer Kindersterblichkeit einher. | Ein Punkt je Land; Armut und Sterblichkeit aus demselben Berichtsjahr. |
-| 11 | Der Zusammenhang ist in allen drei Zeitfenstern sichtbar. | Dieselben 80 Länder um 2000, 2010 und 2020, mit identischen Achsen. |
-| 12 | In Simbabwe sank Kindersterblichkeit trotz steigender Armut. | Ausgangs- und Endwerte der Kindersterblichkeit für die drei bereits ausgewählten Fälle, mit Hinweis auf die jeweilige Armutsveränderung. |
-| 13 | Eine höhere Armutsgrenze zeigt in der Gruppe mit höherem BIP keinen automatisch stärkeren Gesundheitszusammenhang. | Dieselben 26 Länder unter 3- und 40-Dollar-Grenze; gemeinsame Sterblichkeitsskala. |
+| 8 | Bei höherem BIP pro Kopf ist extreme Armut meist seltener. | OWID-inspirierte Länderpunkte: Farbe nach Weltbankregion, Fläche nach Bevölkerung, BIP-Achse logarithmisch. |
+| 9 | Höhere Ungleichheit geht in beiden Erhebungsarten mit mehr Armut einher. | Zwei Streudiagramme mit gleichen Achsen und regionalen Länderfarben. |
+| 10 | Mehr extreme Armut geht meist mit höherer Kindersterblichkeit einher. | An OWIDs konkretem Armut-Sterblichkeits-Vergleich orientierte Bevölkerungskreise mit regionalen Farben. |
+| 11 | Die Kindersterblichkeit sank in beiden Armutsgruppen. | Direkt beschriftete Medianverläufe zweier fester Gruppen derselben 80 Länder. Gruppenzuordnung anhand der Armutsquote um 2000. |
+| 12 | In Simbabwe sank Kindersterblichkeit trotz steigender Armut. | Zwei Verläufe untereinander für dieselben Erhebungsjahre; getrennte, bei null beginnende y-Skalen. |
+| 13 | Eine höhere Armutsgrenze zeigt in der Gruppe mit höherem BIP keinen automatisch stärkeren Gesundheitszusammenhang. | Dieselben 26 Länder unter 3- und 40-Dollar-Grenze; regionale Farben und direkte Ländernamen. |
 
 Die tatsächlichen Titel und Zahlen werden bei jedem Lauf aus den vorhandenen Daten erzeugt und im Abbildungsmanifest unter `takeaway` gespeichert. Die Interpretation gilt für den angegebenen Zeitraum und die jeweilige Datenauswahl.
 
 Die vollständigen Einzeljahre, Länder, Regionen und Auswahlentscheidungen bleiben in den exportierten Tabellen verfügbar. Der Bericht zeigt die Grafiken in dieser Reihenfolge und erläutert die methodischen Grenzen anschließend.
 
 Die Erweiterung gibt den letzten beiden Forschungsfragen einen eigenen Platz im roten Faden: erst wirtschaftliche Leistung und Verteilung, dann der Bezug zu Überlebenschancen von Kindern. Sie beschreibt Lebensbedingungen anhand der vorhandenen Messgrößen. Ein Länderzusammenhang ist kein Nachweis einer individuellen oder kausalen Wirkung. Die schwachen Befunde in der Gruppe mit höherem BIP und der Gegenlauf in Simbabwe gehören ausdrücklich zur Geschichte.
+
+## Konkret betrachtete OWID-Vorlagen
+
+- [Armut und Kindersterblichkeit](https://ourworldindata.org/grapher/extreme-poverty-vs-child-mortality): regionale Farben, Bevölkerungskreise und direkte Ländernamen. Wir verwenden sieben Weltbankregionen und unsere Erhebungsjahre statt der OWID-Kontinente und der aktuellen Onlinewerte.
+- [Kindersterblichkeit nach Einkommensgruppe](https://ourworldindata.org/grapher/child-mortality-by-income-level-of-country): ruhige Verlaufslinien mit Beschriftungen direkt am Ende. Wir bilden zwei feste eigene Armutsgruppen und zeigen ungewichtete Ländermediane an drei Zeitfenstern.
+- [Ungleichheit und BIP](https://ourworldindata.org/grapher/gini-coefficient-vs-gdp-per-capita-pip): wirtschaftliche Indikatoren als regionaler Ländervergleich. Die beiden wirtschaftlichen Grafiken übertragen die Gestaltung auf unsere Variablen, nicht die Aussage oder die Daten der Vorlage.
+
+Die Vorlagen wurden im Browser angesehen. Die neue Umsetzung verzichtet auf Markenlogos und dokumentiert unter jeder Abbildung die konkrete Inspiration und die Abweichungen.

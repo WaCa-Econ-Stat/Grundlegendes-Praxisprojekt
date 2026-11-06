@@ -34,10 +34,15 @@ build_report <- function(a, figures, config) {
     png <- figures$png[i]
     raw <- readBin(png, what = "raw", n = file.info(png)$size)
     img <- paste0("data:image/png;base64,", jsonlite::base64_enc(raw))
+    reference <- ""
+    if ("owid_reference" %in% names(figures) && !is.na(figures$owid_reference[i]) && nzchar(figures$owid_reference[i])) {
+      reference <- paste0("<p class='chart-reference'><a href='", html_escape(figures$owid_reference[i]),
+        "'>OWID-Vorlage ansehen</a> · ", html_escape(figures$design_note[i]), "</p>")
+    }
     paste0(introduction, "<section id='grafik-", i, "'><p class='section-number'>Grafik ", i, "</p><h2 class='sr-only'>",
            html_escape(figures$takeaway[i]), "</h2>",
            "<figure><img src='", img, "' alt='", html_escape(figures$takeaway[i]), "'></figure>",
-           "<p class='interpretation'>", html_escape(explanations[i]), "</p></section>")
+           "<p class='interpretation'>", html_escape(explanations[i]), "</p>", reference, "</section>")
   }, character(1))
   excluded <- a$candidates[eligible == FALSE, .(Reihen = .N), by = .(Grund = reason)]
   excluded <- as.data.frame(excluded[order(-Reihen)])
@@ -71,7 +76,9 @@ build_report <- function(a, figures, config) {
     " Jahre; bei gleichem Abstand das frühere Jahr). BIP, Gini-Index und Kindersterblichkeit gehören zum tatsächlichen Berichtsjahr. Fehlende Werte werden nicht ersetzt; Länder zählen gleich, unabhängig von ihrer Bevölkerung.</p>",
     "<p>Die Rangkorrelation beschreibt die Richtung und Stärke eines monotonen Zusammenhangs: nahe +1 gleichgerichtet, nahe −1 entgegengesetzt, nahe 0 schwach. Sie ist kein kausaler Effekt und hier kein Signifikanztest.</p>",
     html_table(associations),
-    "<p>Im Zeitvergleich stehen dieselben Länder in allen Fenstern. Erhebungsmethode und Vergleichbarkeitsabschnitt dürfen sich zwischen den Fenstern ändern; die Felder vergleichen Länderquerschnitte und belegen keine individuelle Veränderungswirkung.</p>",
+    "<p>Die ursprünglichen Länderquerschnitte verwenden in allen Fenstern dieselben Länder. Erhebungsmethode und Vergleichbarkeitsabschnitt dürfen sich zwischen den Fenstern ändern; der Vergleich belegt keine individuelle Veränderungswirkung.</p>",
+    "<p>Die Verlaufsgrafik fasst diese Länder nun in zwei festen Gruppen zusammen: mindestens 30 % bzw. unter 30 % extreme Armut im ersten Zeitfenster. Die Gruppenzuordnung bleibt unverändert. Gezeigt sind ungewichtete Ländermediane der Kindersterblichkeit, keine bevölkerungsgewichteten Gruppenquoten. Die Linien verbinden ausschließlich die drei berechneten Zeitfenster. Die Tabelle oben bewahrt die Zusammenhänge in den einzelnen Länderquerschnitten.</p>",
+    "<p>Die Punktflächen in den BIP- und Kindersterblichkeits-Streudiagrammen zeigen die Bevölkerung des tatsächlichen Berichtsjahrs. Die Farben entsprechen unseren sieben Weltbankregionen. Die Rangkorrelationen gewichten weiterhin jedes Land gleich. Die Vorlagen von Our World in Data verwenden teilweise andere Regionen, Datenversionen und Einheiten; wir übernehmen ihre Darstellungsprinzipien.</p>",
     "<p>Die Gruppe mit höherem BIP beginnt bei ", fmt(config$higher_gdp_cutoff, 0),
     " US-Dollar pro Kopf und Jahr in Preisen von 2015. Das ist eine eigene Analysegruppe und keine offizielle Weltbank-Einkommensklasse. Die ergänzende 40-Dollar-Grenze stammt aus dem Kursdatensatz und bezeichnet hier keine extreme Armut. Die Tabelle higher_gdp_sensitivity.csv zeigt auch andere BIP-Abgrenzungen.</p>",
     "<h3>Wie stark hängt der Befund von der BIP-Abgrenzung ab?</h3>", html_table(sensitivity),
@@ -92,6 +99,9 @@ build_report <- function(a, figures, config) {
     "<li><a href='https://ourworldindata.org/explorers/poverty-explorer'>Poverty Data Explorer mit Erhebungsarten und Vergleichbarkeitsbrüchen</a></li>",
     "<li><a href='https://ourworldindata.org/grapher/share-in-poverty-relative-to-different-poverty-thresholds'>Vergleich verschiedener Armutsgrenzen</a></li>",
     "<li><a href='https://ourworldindata.org/grapher/child-mortality'>Kindersterblichkeit: UN IGME/Gapminder via Our World in Data</a></li>",
+    "<li><a href='https://ourworldindata.org/grapher/extreme-poverty-vs-child-mortality'>OWID-Vorlage: Kindersterblichkeit und extreme Armut</a></li>",
+    "<li><a href='https://ourworldindata.org/grapher/child-mortality-by-income-level-of-country'>OWID-Vorlage: direkt beschriftete Gruppenverläufe</a></li>",
+    "<li><a href='https://ourworldindata.org/grapher/gini-coefficient-vs-gdp-per-capita-pip'>OWID-Vorlage: wirtschaftliche Indikatoren im Ländervergleich</a></li>",
     "<li><a href='https://github.com/worldbank/pip/blob/master/pip_cl.ado'>Weltbank-PIP-Quellcode: Definition und Einheit von reporting_gdp</a></li></ul></section>",
     "<footer>Analyse des Kursdatensatzes. Grafiken und Zusammenfassungen werden mit run_all.R reproduziert.</footer>")
   css <- "body{margin:0;background:#f4f6f7;color:#283545;font:17px/1.65 system-ui,Arial,sans-serif}main{max-width:1180px;margin:auto;background:white;padding:60px 52px}header{border-bottom:2px solid #315f87;padding-bottom:32px}h1{font:700 48px/1.15 Georgia,serif;margin:10px 0 20px}h2{font-size:27px;line-height:1.3}h3{font-size:20px}.lead{font-size:21px;max-width:900px}.eyebrow,.section-number{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#586674}section{padding:28px 0;border-bottom:1px solid #dfe4e8}a{color:#315f87}figure{margin:20px -20px}img{display:block;width:100%;height:auto}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px 10px;border-bottom:1px solid #dfe4e8;text-align:left;vertical-align:top}th{background:#f1f4f6}.table-scroll{overflow:auto} .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.interpretation{max-width:1000px}footer{padding-top:30px;color:#586674;font-size:13px}@media(max-width:700px){main{padding:28px 18px}h1{font-size:35px}h2{font-size:23px}figure{margin:20px -10px}}@media print{body{background:white}main{max-width:none;padding:0}section{break-inside:avoid}a{color:inherit}img{max-height:85vh;object-fit:contain}}"

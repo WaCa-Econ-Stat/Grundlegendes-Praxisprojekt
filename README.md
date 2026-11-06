@@ -53,18 +53,20 @@ Die Datenaufbereitung kommt unverändert aus `roterFaden`, Stand `cb83cb8` (`R/0
 | `05_erhebungsarten` | Gegensatz von Einkommen und Konsum in Europa/Zentralasien und Subsahara-Afrika |
 | `06_einkommen_konsum_differenzen` | Ein Balken für den Median der Methodenunterschiede je Land |
 | `07_alternative_armutsgrenzen` | Drei weltweite Verläufe unter 3, 4,20 und 8,30 int. Dollar pro Tag |
-| `08_bip_und_armut` | BIP pro Kopf und extreme Armut: ein Punkt je Land nahe 2020 |
-| `09_ungleichheit_und_armut` | Gini-Index und Armut, Einkommen und Konsum in getrennten Feldern |
-| `10_kindersterblichkeit_und_armut` | Kindersterblichkeit und Armut aus demselben Länderjahr |
-| `11_kindersterblichkeit_zeitvergleich` | Dieselben 80 Länder um 2000, 2010 und 2020 auf gemeinsamen Achsen |
-| `12_kindersterblichkeit_fallbeispiele` | Kindersterblichkeit in den bisherigen drei Fällen, besonders Simbabwe |
-| `13_hoehere_grenze_kindersterblichkeit` | 3- und 40-Dollar-Grenze in derselben Gruppe mit höherem BIP |
+| `08_bip_und_armut` | BIP und Armut: regionale Farben, Punktflächen nach Bevölkerung |
+| `09_ungleichheit_und_armut` | Gini und Armut, getrennt nach Erhebungsart und farblich nach Region |
+| `10_kindersterblichkeit_und_armut` | OWID-inspirierter Vergleich mit regionalen Farben und Bevölkerungsflächen |
+| `11_kindersterblichkeit_zeitvergleich` | Zwei feste Armutsgruppen aus denselben 80 Ländern; direkt beschriftete Medianverläufe |
+| `12_kindersterblichkeit_fallbeispiele` | Simbabwe: Armuts- und Sterblichkeitsverlauf untereinander, dieselben Jahre |
+| `13_hoehere_grenze_kindersterblichkeit` | 3- und 40-Dollar-Grenze, regionale Farben und direkte Ländernamen |
 
 Jede Grafik stellt eine zentrale Aussage in den Titel. Die Darstellung zeigt die dafür nötigen Vergleiche mit direkten Beschriftungen. Das Manifest enthält die Aussage im Feld `takeaway` und die zugehörige kurze Erläuterung. Vollständige Länder- und Jahresdaten bleiben in den Tabellen erhalten.
 
+Die sechs Grafiken zu Lebensbedingungen sind an konkreten OWID-Darstellungen orientiert: regionale Länderfarben, Bevölkerung als Punktfläche, direkt beschriftete Linien und ruhige Achsen. Der Bericht verlinkt unter jeder dieser Grafiken die Vorlage und erläutert die Anpassung. `owid_reference` und `design_note` im Manifest dokumentieren dies ebenfalls. Die Umsetzung ist eigener R-Code; Messwerte, Weltbankregionen und Erhebungsauswahl stammen weiterhin aus unserem Kursprojekt.
+
 Die neuen Grafiken beantworten die Fragen nach wirtschaftlichen Indikatoren und Kindersterblichkeit. Sie beschreiben Zusammenhänge zwischen Ländern. Eine Wirkung von Armut auf einzelne Menschen wird damit nicht geschätzt. Direkte Messreihen zu Wasserzugang, Bildung oder Lebenserwartung sind im Kursauszug nicht enthalten. Kindersterblichkeit ist der vorhandene gesundheitliche Indikator.
 
-Für die neuen Querschnitte wird je Land zunächst die OWID-Erhebung mit dem geringsten Abstand zu 2020 innerhalb von ±2 Jahren ausgewählt. Erst danach werden fehlende Indikatoren ausgeschlossen. Kindersterblichkeit und Armut gehören immer zum selben tatsächlichen Berichtsjahr. Alle Auswahlen und Fehlstellen stehen in `indicator_audit.csv`; Rangkorrelationen in `indicator_associations.csv`. Die BIP-Abgrenzung der letzten Grafik wird zusätzlich bei 10.000, 20.000 und 30.000 US-Dollar geprüft (`higher_gdp_sensitivity.csv`).
+Für die neuen Querschnitte wird je Land zunächst die OWID-Erhebung mit dem geringsten Abstand zu 2020 innerhalb von ±2 Jahren ausgewählt. Erst danach werden fehlende Indikatoren ausgeschlossen. Kindersterblichkeit und Armut gehören immer zum selben tatsächlichen Berichtsjahr. Alle Auswahlen und Fehlstellen stehen in `indicator_audit.csv`; Rangkorrelationen in `indicator_associations.csv`. Die festen Zeitverlaufsgruppen und ihre Mediane stehen in `mortality_group_membership.csv` und `mortality_groups.csv`, die Simbabwe-Verläufe in `mortality_focus.csv`. Die BIP-Abgrenzung der letzten Grafik wird zusätzlich bei 10.000, 20.000 und 30.000 US-Dollar geprüft (`higher_gdp_sensitivity.csv`).
 
 ## Einstellungen und Änderungen
 
@@ -122,6 +124,9 @@ Weltbank Poverty and Inequality Platform (2026), aufbereitet durch Our World in 
 - [Vergleich anderer Armutsgrenzen](https://ourworldindata.org/grapher/share-in-poverty-relative-to-different-poverty-thresholds)
 - [Datenabdeckung durch Haushaltsbefragungen](https://ourworldindata.org/grapher/data-deprivation-poverty-surveys-per-decade)
 - [Kindersterblichkeit: UN IGME/Gapminder via OWID](https://ourworldindata.org/grapher/child-mortality)
+- [Konkrete Vorlage: Kindersterblichkeit und extreme Armut](https://ourworldindata.org/grapher/extreme-poverty-vs-child-mortality)
+- [Konkrete Vorlage: direkt beschriftete Sterblichkeitsverläufe nach Einkommensgruppe](https://ourworldindata.org/grapher/child-mortality-by-income-level-of-country)
+- [Konkrete Vorlage: wirtschaftliche Indikatoren im regionalen Ländervergleich](https://ourworldindata.org/grapher/gini-coefficient-vs-gdp-per-capita-pip)
 - [Weltbank-PIP-Quellcode mit Einheit von `reporting_gdp`](https://github.com/worldbank/pip/blob/master/pip_cl.ado)
 
 Die Linienansichten und sichtbaren Vergleichbarkeitsbrüche dienen als visuelle Orientierung. Länderbalkenvergleich, Erhebungsartenübersicht und Differenzbalken sind eigene Auswertungen des Kursdatensatzes.

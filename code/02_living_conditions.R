@@ -39,11 +39,21 @@ build_living_conditions <- function(a, config) {
                              welfare_types = data.table::uniqueN(welfare_type),
                              in_balanced_panel = country_code[1] %in% common), by = country_code]
   if (!length(common)) stop("Keine gemeinsamen Länder für die Kindersterblichkeits-Zeitfenster.")
+  # Fixed groups: a country never changes group as its poverty rate changes.
+  baseline_year <- min(years)
+  membership <- mortality_panel[target_year == baseline_year,
+    .(country_code, baseline_year = target_year, baseline_actual_year = year,
+      baseline_poverty_pct = pct_below_3,
+      poverty_group = ifelse(pct_below_3 >= 30, "high", "lower"))]
+  grouped <- merge(mortality_panel, membership[, .(country_code, poverty_group)], by = "country_code")
+  mortality_groups <- grouped[, .(n = .N, mortality_median = median(child_mortality),
+                                   first_actual_year = min(year), last_actual_year = max(year)),
+                              by = .(poverty_group, target_year)]
 
   mortality <- snapshot[is.finite(child_mortality)]
   higher_gdp <- mortality[is.finite(reporting_gdp) & reporting_gdp >= config$higher_gdp_cutoff]
   if (nrow(higher_gdp) < 3L) stop("Zu wenige Länder oberhalb der eingestellten BIP-Grenze.")
-  richer_thresholds <- data.table::melt(higher_gdp, id.vars = c("country_code", "country_de", "year", "child_mortality", "reporting_gdp"),
+  richer_thresholds <- data.table::melt(higher_gdp, id.vars = c("country_code", "country_de", "year", "child_mortality", "reporting_gdp", "region_code", "reporting_pop"),
                                        measure.vars = c("pct_below_3", "pct_below_40"),
                                        variable.name = "threshold", value.name = "poverty_pct")
 
@@ -61,6 +71,14 @@ build_living_conditions <- function(a, config) {
   if (anyNA(case_mortality$mortality_start) || anyNA(case_mortality$mortality_end)) {
     stop("Kindersterblichkeit fehlt an einem ausgewählten Fall-Endpunkt.")
   }
+  focus <- case_mortality[change_pp > 0 & mortality_change_pp < 0][order(-change_pp)]
+  if (!nrow(focus)) focus <- case_mortality[order(-abs(change_pp))]
+  focus <- focus[1L]
+  focus_series <- a$surveys[country_code == focus$country_code & welfare_type == focus$welfare_type &
+                             year >= focus$start_year & year <= focus$end_year]
+  mortality_focus <- data.table::melt(focus_series,
+    id.vars = c("country_code", "country_name", "year", "welfare_type", "survey_comparability"),
+    measure.vars = c("poverty_pct", "child_mortality"), variable.name = "indicator", value.name = "value")
 
   association <- function(x, variable, sample, period = config$indicator_year) {
     valid <- is.finite(x[[variable]]) & is.finite(x$pct_below_3)
@@ -88,6 +106,7 @@ build_living_conditions <- function(a, config) {
 
   extra <- list(indicator_snapshot = snapshot, indicator_audit = audit, indicator_associations = stats,
                 mortality_snapshot = mortality, mortality_panel = mortality_panel, mortality_panel_audit = panel_audit,
+                mortality_group_membership = membership, mortality_groups = mortality_groups, mortality_focus = mortality_focus,
                 case_mortality = case_mortality, higher_gdp_thresholds = richer_thresholds,
                 higher_gdp_associations = higher_gdp_stats, higher_gdp_sensitivity = sensitivity)
   for (name in names(extra)) write_table(extra[[name]], name)

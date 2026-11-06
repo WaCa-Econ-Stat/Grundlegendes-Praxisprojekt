@@ -8,7 +8,8 @@ write_table <- function(x, name) {
 }
 
 country_labels <- function(x) {
-  de <- c(Albania = "Albanien", Bulgaria = "Bulgarien", Croatia = "Kroatien", Estonia = "Estland",
+  de <- c(Germany = "Deutschland", `United States` = "USA", `United Kingdom` = "Vereinigtes Königreich",
+          Albania = "Albanien", Bulgaria = "Bulgarien", Croatia = "Kroatien", Estonia = "Estland",
           Hungary = "Ungarn", Latvia = "Lettland", Lithuania = "Litauen", Montenegro = "Montenegro",
           Nicaragua = "Nicaragua", Philippines = "Philippinen", Poland = "Polen", Romania = "Rumänien",
           `Russian Federation` = "Russland", Russia = "Russland", Serbia = "Serbien",
