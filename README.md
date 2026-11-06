@@ -24,7 +24,7 @@ Im Terminal funktioniert `Rscript --vanilla run_all.R`. Das Skript findet den Pr
 
 ## Ergebnisse ansehen
 
-- **`output/bericht.html`**: Bericht mit allen Grafiken, Fragen, Fallauswahl und Grenzen. Die Grafiken sind eingebettet. Die HTML-Datei lässt sich einzeln weitergeben und offline öffnen.
+- **`output/bericht.html`**: Bericht mit allen Grafiken, zentralen Aussagen, Fallauswahl und Grenzen. Die Grafiken sind eingebettet. Die HTML-Datei lässt sich einzeln weitergeben und offline öffnen.
 - **`output/figures/`**: sieben Grafiken als PNG und SVG. Die SVG-Dateien lassen sich verlustfrei skalieren.
 - **`output/ergebnisse.md`**: kurze Ergebnisübersicht.
 - **`output/tables/`**: Datengrundlagen der Grafiken, Auswahl- und Ausschlussentscheidungen, Methodenpaare und Empfindlichkeit gegenüber den Zeitfenstern.
@@ -37,12 +37,14 @@ Generierte Ergebnisse und Paketbibliotheken sind in Git ausgeschlossen. Sie ents
 | Datei | Inhalt |
 | --- | --- |
 | `01_weltweiter_verlauf` | Weltweite Armutsquote 1990–2024 |
-| `02_regionale_verlaeufe` | Sieben Weltbankregionen mit gemeinsamen Skalen |
-| `03_laendervergleich` | Anfangs- und Endquoten vergleichbarer Länderreihen |
-| `04_laender_im_regionalen_vergleich` | Drei anhand der Daten ausgewählte Fälle und ihre Regionalquoten |
-| `05_erhebungsarten` | Jüngste verfügbare Erhebungsarten je Land, nach Regionen |
-| `06_einkommen_konsum_differenzen` | Land-Jahr-Paare und Median der Differenzen je Land |
-| `07_alternative_armutsgrenzen` | Welt und Regionen unter 3, 4,20 und 8,30 int. Dollar pro Tag |
+| `02_regionale_verlaeufe` | Ausgangs- und Endquote der sieben Weltregionen, Subsahara-Afrika hervorgehoben |
+| `03_laendervergleich` | Direkter Balkenvergleich der Veränderungen in drei ausgewählten Ländern |
+| `04_laender_im_regionalen_vergleich` | Ein Land als Beispiel für einen Gegenlauf zum Regionaltrend |
+| `05_erhebungsarten` | Gegensatz von Einkommen und Konsum in Europa/Zentralasien und Subsahara-Afrika |
+| `06_einkommen_konsum_differenzen` | Ein Balken für den Median der Methodenunterschiede je Land |
+| `07_alternative_armutsgrenzen` | Drei weltweite Verläufe unter 3, 4,20 und 8,30 int. Dollar pro Tag |
+
+Jede Grafik stellt eine zentrale Aussage in den Titel. Die Darstellung zeigt die dafür nötigen Vergleiche mit direkten Beschriftungen. Das Manifest enthält die Aussage im Feld `takeaway` und die zugehörige kurze Erläuterung. Vollständige Länder- und Jahresdaten bleiben in den Tabellen erhalten.
 
 ## Einstellungen und Änderungen
 
@@ -95,4 +97,4 @@ Weltbank Poverty and Inequality Platform (2026), aufbereitet durch Our World in 
 - [Vergleich anderer Armutsgrenzen](https://ourworldindata.org/grapher/share-in-poverty-relative-to-different-poverty-thresholds)
 - [Datenabdeckung durch Haushaltsbefragungen](https://ourworldindata.org/grapher/data-deprivation-poverty-surveys-per-decade)
 
-Die Linienansichten und sichtbaren Vergleichbarkeitsbrüche dienen als visuelle Orientierung. Länderstreudiagramm, Erhebungsartenübersicht und Differenzdiagramm sind eigene Auswertungen des Kursdatensatzes.
+Die Linienansichten und sichtbaren Vergleichbarkeitsbrüche dienen als visuelle Orientierung. Länderbalkenvergleich, Erhebungsartenübersicht und Differenzbalken sind eigene Auswertungen des Kursdatensatzes.
