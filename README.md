@@ -2,7 +2,7 @@
 
 Neues Analyseprojekt für das Grundlegende Praxisprojekt, WiSe 2026/27.
 
-Die Analyse beginnt mit Welt und Regionen, untersucht vergleichbare Länderreihen und ordnet anschließend die Einkommens- und Konsumdaten ein. Sechs Kerngrafiken und ein ergänzender Vergleich anderer Armutsgrenzen bilden den Aufbau.
+Die Analyse beginnt mit Welt und Regionen, untersucht vergleichbare Länderreihen und ordnet die Einkommens- und Konsumdaten ein. Anschließend vergleicht sie Armut mit wirtschaftlichen Lebensbedingungen und Kindersterblichkeit. Zwölf Kerngrafiken und ein ergänzender Vergleich anderer Armutsgrenzen bilden den Aufbau.
 
 ## Start in RStudio
 
@@ -25,7 +25,7 @@ Im Terminal funktioniert `Rscript --vanilla run_all.R`. Das Skript findet den Pr
 ## Ergebnisse ansehen
 
 - **`output/bericht.html`**: Bericht mit allen Grafiken, zentralen Aussagen, Fallauswahl und Grenzen. Die Grafiken sind eingebettet. Die HTML-Datei lässt sich einzeln weitergeben und offline öffnen.
-- **`output/figures/`**: sieben Grafiken als PNG und SVG. Die SVG-Dateien lassen sich verlustfrei skalieren.
+- **`output/figures/`**: dreizehn Grafiken als PNG und SVG. Die SVG-Dateien lassen sich verlustfrei skalieren.
 - **`output/ergebnisse.md`**: kurze Ergebnisübersicht.
 - **`output/tables/`**: Datengrundlagen der Grafiken, Auswahl- und Ausschlussentscheidungen, Methodenpaare und Empfindlichkeit gegenüber den Zeitfenstern.
 - **`output/results/`**: Abbildungsmanifest, Konfiguration, Datenprüfungen, Prüfsummen der Eingaben und verwendete R-Sitzung.
@@ -53,12 +53,22 @@ Die Datenaufbereitung kommt unverändert aus `roterFaden`, Stand `cb83cb8` (`R/0
 | `05_erhebungsarten` | Gegensatz von Einkommen und Konsum in Europa/Zentralasien und Subsahara-Afrika |
 | `06_einkommen_konsum_differenzen` | Ein Balken für den Median der Methodenunterschiede je Land |
 | `07_alternative_armutsgrenzen` | Drei weltweite Verläufe unter 3, 4,20 und 8,30 int. Dollar pro Tag |
+| `08_bip_und_armut` | BIP pro Kopf und extreme Armut: ein Punkt je Land nahe 2020 |
+| `09_ungleichheit_und_armut` | Gini-Index und Armut, Einkommen und Konsum in getrennten Feldern |
+| `10_kindersterblichkeit_und_armut` | Kindersterblichkeit und Armut aus demselben Länderjahr |
+| `11_kindersterblichkeit_zeitvergleich` | Dieselben 80 Länder um 2000, 2010 und 2020 auf gemeinsamen Achsen |
+| `12_kindersterblichkeit_fallbeispiele` | Kindersterblichkeit in den bisherigen drei Fällen, besonders Simbabwe |
+| `13_hoehere_grenze_kindersterblichkeit` | 3- und 40-Dollar-Grenze in derselben Gruppe mit höherem BIP |
 
 Jede Grafik stellt eine zentrale Aussage in den Titel. Die Darstellung zeigt die dafür nötigen Vergleiche mit direkten Beschriftungen. Das Manifest enthält die Aussage im Feld `takeaway` und die zugehörige kurze Erläuterung. Vollständige Länder- und Jahresdaten bleiben in den Tabellen erhalten.
 
+Die neuen Grafiken beantworten die Fragen nach wirtschaftlichen Indikatoren und Kindersterblichkeit. Sie beschreiben Zusammenhänge zwischen Ländern. Eine Wirkung von Armut auf einzelne Menschen wird damit nicht geschätzt. Direkte Messreihen zu Wasserzugang, Bildung oder Lebenserwartung sind im Kursauszug nicht enthalten. Kindersterblichkeit ist der vorhandene gesundheitliche Indikator.
+
+Für die neuen Querschnitte wird je Land zunächst die OWID-Erhebung mit dem geringsten Abstand zu 2020 innerhalb von ±2 Jahren ausgewählt. Erst danach werden fehlende Indikatoren ausgeschlossen. Kindersterblichkeit und Armut gehören immer zum selben tatsächlichen Berichtsjahr. Alle Auswahlen und Fehlstellen stehen in `indicator_audit.csv`; Rangkorrelationen in `indicator_associations.csv`. Die BIP-Abgrenzung der letzten Grafik wird zusätzlich bei 10.000, 20.000 und 30.000 US-Dollar geprüft (`higher_gdp_sensitivity.csv`).
+
 ## Einstellungen und Änderungen
 
-Die zentralen Einstellungen stehen am Anfang von `code/00_setup.R`: Analysezeitraum, Länderfenster, Mindestzeitspanne, Mindestanzahl der Erhebungen, Aktualitätsfenster, Auflösung und der optionale Schwellenvergleich.
+Die zentralen Einstellungen stehen am Anfang von `code/00_setup.R`: Analysezeitraum, Länderfenster, Mindestzeitspanne, Mindestanzahl der Erhebungen, Aktualitätsfenster, Indikator-Zieljahr und Zeitfenster, Sterblichkeits-Vergleichsjahre, BIP-Abgrenzung, Auflösung und der optionale Schwellenvergleich.
 
 Nach dem Laden von `run_all.R` können Einstellungen auch gezielt übergeben werden:
 
@@ -66,7 +76,7 @@ Nach dem Laden von `run_all.R` können Einstellungen auch gezielt übergeben wer
 result <- run_project(project_root, config = list(include_thresholds = FALSE))
 ```
 
-Das erzeugt die sechs Kerngrafiken und einen dazu passenden Bericht. Bereits erzeugte, jetzt nicht verwendete Bilddateien bleiben erhalten. Das aktuelle Abbildungsmanifest entscheidet, welche Grafiken zum aktuellen Lauf gehören.
+Das erzeugt die zwölf Kerngrafiken und einen dazu passenden Bericht. Bereits erzeugte, jetzt nicht verwendete Bilddateien bleiben erhalten. Das aktuelle Abbildungsmanifest entscheidet, welche Grafiken zum aktuellen Lauf gehören.
 
 ## Projektstruktur
 
@@ -79,7 +89,9 @@ code/
   00_helpers.R               Prüfungen, Beschriftung und Grafikexport
   01_prepare_data.R          Aufbereitung ausführen und Analyse anschließen
   02_build_analysis_data.R   Länderreihen, Fallauswahl, Erhebungsarten und Paare
+  02_living_conditions.R     Indikator-Querschnitte, Zeitvergleich und Prüfungen
   03_make_figures.R          Grafiken
+  03_living_conditions_figures.R  Sechs Grafiken zu Lebensbedingungen
   04_build_report.R          Bericht und Ergebnisübersicht
 data/                       Unveränderte Kursdaten und Metadaten
 tests/run_checks.R          Fachliche Prüfungen und Integration
@@ -109,5 +121,7 @@ Weltbank Poverty and Inequality Platform (2026), aufbereitet durch Our World in 
 - [Poverty Data Explorer](https://ourworldindata.org/explorers/poverty-explorer)
 - [Vergleich anderer Armutsgrenzen](https://ourworldindata.org/grapher/share-in-poverty-relative-to-different-poverty-thresholds)
 - [Datenabdeckung durch Haushaltsbefragungen](https://ourworldindata.org/grapher/data-deprivation-poverty-surveys-per-decade)
+- [Kindersterblichkeit: UN IGME/Gapminder via OWID](https://ourworldindata.org/grapher/child-mortality)
+- [Weltbank-PIP-Quellcode mit Einheit von `reporting_gdp`](https://github.com/worldbank/pip/blob/master/pip_cl.ado)
 
 Die Linienansichten und sichtbaren Vergleichbarkeitsbrüche dienen als visuelle Orientierung. Länderbalkenvergleich, Erhebungsartenübersicht und Differenzbalken sind eigene Auswertungen des Kursdatensatzes.

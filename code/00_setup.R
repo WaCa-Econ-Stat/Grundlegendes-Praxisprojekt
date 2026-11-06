@@ -16,6 +16,8 @@ setup_project <- function(config = list()) {
     start_year = 1990L, end_year = 2024L,
     country_start = 2010L, country_end = 2020L, tolerance = 2L,
     min_span = 8L, min_surveys = 3L, coverage_start = 2015L,
+    indicator_year = 2020L, indicator_tolerance = 2L,
+    mortality_years = c(2000L, 2010L, 2020L), higher_gdp_cutoff = 20000,
     include_thresholds = TRUE, dpi = 180L,
     source = "Quelle: Weltbank PIP (2026), aufbereitet durch Our World in Data. Kursdatensatz."
   )
@@ -25,6 +27,11 @@ setup_project <- function(config = list()) {
   stopifnot(config$start_year < config$end_year, config$country_start < config$country_end,
             config$tolerance >= 0, config$min_span > 0, config$min_surveys >= 2,
             config$coverage_start >= config$start_year, config$coverage_start <= config$end_year)
+  stopifnot(length(config$indicator_year) == 1L, config$indicator_tolerance >= 0,
+            length(config$mortality_years) >= 2L, !anyDuplicated(config$mortality_years),
+            config$higher_gdp_cutoff > 0,
+            all(c(config$indicator_year, config$mortality_years) >= config$start_year),
+            all(c(config$indicator_year, config$mortality_years) <= config$end_year))
   if (config$country_start - config$tolerance < config$start_year ||
       config$country_end + config$tolerance > config$end_year) {
     stop("Die Länderfenster müssen vollständig im Analysezeitraum liegen.")

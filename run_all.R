@@ -9,7 +9,7 @@ run_project <- function(project_root, config = list()) {
   on.exit(setwd(previous_directory), add = TRUE)
   started <- Sys.time()
   for (script in c("00_setup", "00_helpers", "01_prepare_data", "02_build_analysis_data",
-                    "03_make_figures", "04_build_report")) {
+                    "02_living_conditions", "03_living_conditions_figures", "03_make_figures", "04_build_report")) {
     source(file.path("code", paste0(script, ".R")), local = TRUE, encoding = "UTF-8")
   }
   config <- setup_project(config)
@@ -17,6 +17,7 @@ run_project <- function(project_root, config = list()) {
   prepared <- prepare_data(config)
   message("2/4 Vergleichbare Reihen und Methodenpaare bestimmen")
   analysis <- build_analysis_data(prepared, config)
+  analysis <- build_living_conditions(analysis, config)
   message("3/4 Grafiken erzeugen")
   figures <- make_figures(analysis, config)
   message("4/4 Bericht und Ergebnisuebersicht schreiben")

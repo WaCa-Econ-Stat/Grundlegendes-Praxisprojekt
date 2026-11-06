@@ -11,7 +11,8 @@ make_figures <- function(a, config) {
   export <- function(plot, name, question, takeaway, explanation, height = 8) {
     plot <- plot + labs(title = headline(takeaway))
     out <- save_figure(plot, name, config, height = height)
-    out[, `:=`(question = question, takeaway = gsub("\n", " ", takeaway, fixed = TRUE), explanation = explanation)]
+    out[, `:=`(question = question, takeaway = gsub("\n", " ", takeaway, fixed = TRUE), explanation = explanation,
+               section = "Armut und Messung")]
     figures[[length(figures) + 1L]] <<- out
   }
 
@@ -225,6 +226,7 @@ make_figures <- function(a, config) {
     export(p, "07_alternative_armutsgrenzen", "Bleibt die Richtung des Welttrends bei höheren Grenzen bestehen?", takeaway,
            "Alle drei Linien gehen über den gesamten Zeitraum zurück. Die höhere Grenze erfasst zugleich einen wesentlich größeren Anteil der Bevölkerung. Der Vergleich konzentriert sich auf die Weltreihe.")
   }
+  figures <- c(figures, make_living_conditions_figures(a, config))
   manifest <- rbindlist(figures)
   fwrite(manifest, "output/results/figure_manifest.csv", bom = TRUE)
   manifest

@@ -24,10 +24,17 @@ build_report <- function(a, figures, config) {
     `Engeres Fenster` = narrow_status)])
   explanations <- figures$explanation
   sections <- vapply(seq_len(nrow(figures)), function(i) {
+    introduction <- ""
+    if (i > 1L && figures$section[i] != figures$section[i - 1L]) {
+      description <- switch(figures$section[i],
+        "Wirtschaftliche Lebensbedingungen" = "Die Höhe der wirtschaftlichen Leistung und ihre Verteilung ergänzen die Armutsquote. Die folgenden Ländervergleiche beschreiben Zusammenhänge und schätzen keine isolierten Wirkungen.",
+        "Gesundheit und Kindersterblichkeit" = "Wie passen monetäre Armut und die Überlebenschancen von Kindern zusammen? Die Grafiken prüfen den Zusammenhang zwischen Ländern, seine zeitliche Stabilität und die Grenzen bei höherem BIP.")
+      introduction <- paste0("<section class='chapter'><h2>", html_escape(figures$section[i]), "</h2><p>", description, "</p></section>")
+    }
     png <- figures$png[i]
     raw <- readBin(png, what = "raw", n = file.info(png)$size)
     img <- paste0("data:image/png;base64,", jsonlite::base64_enc(raw))
-    paste0("<section id='grafik-", i, "'><p class='section-number'>Grafik ", i, "</p><h2 class='sr-only'>",
+    paste0(introduction, "<section id='grafik-", i, "'><p class='section-number'>Grafik ", i, "</p><h2 class='sr-only'>",
            html_escape(figures$takeaway[i]), "</h2>",
            "<figure><img src='", img, "' alt='", html_escape(figures$takeaway[i]), "'></figure>",
            "<p class='interpretation'>", html_escape(explanations[i]), "</p></section>")
@@ -40,14 +47,37 @@ build_report <- function(a, figures, config) {
   coverage[is.na(Eingeschlossen), Eingeschlossen := 0L]
   coverage <- as.data.frame(coverage[, .(Region, Eingeschlossen, Im_Datensatz)])
   findings <- figures$takeaway
+  associations <- as.data.frame(a$indicator_associations[, .(
+    Vergleich = sample, Zieljahr = target_year,
+    Indikator = fifelse(indicator == "reporting_gdp", "BIP pro Kopf",
+                        fifelse(indicator == "gini_points", "Gini-Index", "Kindersterblichkeit")),
+    Länder = n, `Spearman-Rangkorrelation` = fmt(rho, 2),
+    Erhebungsjahre = paste0(first_actual_year, "–", last_actual_year))])
+  sensitivity <- data.table::dcast(a$higher_gdp_sensitivity, gdp_cutoff + n ~ threshold, value.var = "rho")
+  sensitivity <- as.data.frame(sensitivity[, .(
+    `BIP ab (US-Dollar von 2015)` = fmt(gdp_cutoff, 0), Länder = n,
+    `Rangkorrelation bei 3 Dollar` = fmt(pct_below_3, 2),
+    `bei 8,30 Dollar` = fmt(pct_below_8_30, 2), `bei 40 Dollar` = fmt(pct_below_40, 2))])
   toc <- paste0("<li><a href='#grafik-", seq_len(nrow(figures)), "'>", html_escape(figures$takeaway), "</a></li>", collapse = "")
   body <- paste0(
     "<header><p class='eyebrow'>Grundlegendes Praxisprojekt</p><h1>Leben unter 3 Dollar am Tag</h1>",
-    "<p class='lead'>Extreme Armut seit 1990. Weltweite Entwicklung, regionale Unterschiede und die Vergleichbarkeit nationaler Erhebungen.</p></header>",
+    "<p class='lead'>Extreme Armut seit 1990: weltweite Entwicklung, regionale Unterschiede, wirtschaftliche Lebensbedingungen und die Überlebenschancen von Kindern.</p></header>",
     "<section><h2>Gegenstand und Daten</h2><p>3 internationale Dollar pro Person und Tag in Kaufkraft von 2021 berücksichtigen Preisunterschiede zwischen Ländern und über die Zeit. Sie entsprechen keinem aktuellen Dollar-Wechselkurs.</p>",
     "<p>Die Analyse verwendet ausschließlich den vorhandenen Kursdatensatz. Nationale Werte stammen aus Haushaltsbefragungen zu Einkommen oder Konsum. Welt- und Regionalwerte sind modelliert. Der Hauptzeitraum endet ", config$end_year, ".</p>",
     "<p>Ein Rückgang von 40 % auf 20 % entspricht 20 Prozentpunkten. Quoten und Veränderungen verwenden deshalb unterschiedliche Einheiten.</p><ol>", toc, "</ol></section>",
     paste(sections, collapse = "\n"),
+    "<section><h2>Zusammenhänge und ihre Grenzen</h2><p>Die neuen Vergleiche verwenden je Land eine nationale, durch OWID ausgewählte Erhebung nahe ",
+    config$indicator_year, " (±", config$indicator_tolerance,
+    " Jahre; bei gleichem Abstand das frühere Jahr). BIP, Gini-Index und Kindersterblichkeit gehören zum tatsächlichen Berichtsjahr. Fehlende Werte werden nicht ersetzt; Länder zählen gleich, unabhängig von ihrer Bevölkerung.</p>",
+    "<p>Die Rangkorrelation beschreibt die Richtung und Stärke eines monotonen Zusammenhangs: nahe +1 gleichgerichtet, nahe −1 entgegengesetzt, nahe 0 schwach. Sie ist kein kausaler Effekt und hier kein Signifikanztest.</p>",
+    html_table(associations),
+    "<p>Im Zeitvergleich stehen dieselben Länder in allen Fenstern. Erhebungsmethode und Vergleichbarkeitsabschnitt dürfen sich zwischen den Fenstern ändern; die Felder vergleichen Länderquerschnitte und belegen keine individuelle Veränderungswirkung.</p>",
+    "<p>Die Gruppe mit höherem BIP beginnt bei ", fmt(config$higher_gdp_cutoff, 0),
+    " US-Dollar pro Kopf und Jahr in Preisen von 2015. Das ist eine eigene Analysegruppe und keine offizielle Weltbank-Einkommensklasse. Die ergänzende 40-Dollar-Grenze stammt aus dem Kursdatensatz und bezeichnet hier keine extreme Armut. Die Tabelle higher_gdp_sensitivity.csv zeigt auch andere BIP-Abgrenzungen.</p>",
+    "<h3>Wie stark hängt der Befund von der BIP-Abgrenzung ab?</h3>", html_table(sensitivity),
+    "<p>Bei der breiteren Gruppe ab 10.000 US-Dollar ist der Zusammenhang unter höheren Armutsgrenzen stärker. Das schwache Ergebnis der letzten Grafik gilt deshalb für ihre konkrete Ländergruppe und lässt sich nicht auf sämtliche wohlhabenderen Länder übertragen.</p>",
+    "<p>Kindersterblichkeit beschreibt Todesfälle vor dem fünften Geburtstag je 100 Lebendgeburten. Länderwerte verbinden keine individuellen Haushalte mit den betroffenen Kindern. Die Daten können deshalb nicht zeigen, um wie viel die Verringerung von Armut das Sterberisiko einer bestimmten Person verändert.</p>",
+    "<p>Wasserzugang, Ernährung, Bildung und Lebenserwartung sind im verwendeten Datenauszug nicht als zusätzliche Messreihen enthalten. BIP und Ungleichheit beschreiben wirtschaftliche Bedingungen; sie messen diese weiteren Lebensbereiche nicht direkt.</p></section>",
     "<section><h2>Auswahl und Grenzen der Länderanalyse</h2><p>Zieljahre ", config$country_start, " und ", config$country_end,
     ", jeweils ±", config$tolerance, " Jahre. Bei gleichem Abstand entscheidet das frühere Erhebungsjahr. Mindestens ", config$min_span,
     " Jahre Zeitspanne und ", config$min_surveys, " Beobachtungen sind nötig. Erhebungsart und Vergleichbarkeitskennung bleiben innerhalb des Intervalls gleich.</p>",
@@ -60,7 +90,9 @@ build_report <- function(a, figures, config) {
     "<section><h2>Quellen und visuelle Vorlagen</h2><p>Weltbank Poverty and Inequality Platform (2026), aufbereitet durch Our World in Data. Die Eingabedateien und ihre Prüfsummen stehen in output/results/input_checksums.csv.</p>",
     "<ul><li><a href='https://ourworldindata.org/grapher/share-of-population-in-extreme-poverty'>Armutsquoten für Welt, Regionen und Länder</a></li>",
     "<li><a href='https://ourworldindata.org/explorers/poverty-explorer'>Poverty Data Explorer mit Erhebungsarten und Vergleichbarkeitsbrüchen</a></li>",
-    "<li><a href='https://ourworldindata.org/grapher/share-in-poverty-relative-to-different-poverty-thresholds'>Vergleich verschiedener Armutsgrenzen</a></li></ul></section>",
+    "<li><a href='https://ourworldindata.org/grapher/share-in-poverty-relative-to-different-poverty-thresholds'>Vergleich verschiedener Armutsgrenzen</a></li>",
+    "<li><a href='https://ourworldindata.org/grapher/child-mortality'>Kindersterblichkeit: UN IGME/Gapminder via Our World in Data</a></li>",
+    "<li><a href='https://github.com/worldbank/pip/blob/master/pip_cl.ado'>Weltbank-PIP-Quellcode: Definition und Einheit von reporting_gdp</a></li></ul></section>",
     "<footer>Analyse des Kursdatensatzes. Grafiken und Zusammenfassungen werden mit run_all.R reproduziert.</footer>")
   css <- "body{margin:0;background:#f4f6f7;color:#283545;font:17px/1.65 system-ui,Arial,sans-serif}main{max-width:1180px;margin:auto;background:white;padding:60px 52px}header{border-bottom:2px solid #315f87;padding-bottom:32px}h1{font:700 48px/1.15 Georgia,serif;margin:10px 0 20px}h2{font-size:27px;line-height:1.3}h3{font-size:20px}.lead{font-size:21px;max-width:900px}.eyebrow,.section-number{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#586674}section{padding:28px 0;border-bottom:1px solid #dfe4e8}a{color:#315f87}figure{margin:20px -20px}img{display:block;width:100%;height:auto}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:9px 10px;border-bottom:1px solid #dfe4e8;text-align:left;vertical-align:top}th{background:#f1f4f6}.table-scroll{overflow:auto} .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.interpretation{max-width:1000px}footer{padding-top:30px;color:#586674;font-size:13px}@media(max-width:700px){main{padding:28px 18px}h1{font-size:35px}h2{font-size:23px}figure{margin:20px -10px}}@media print{body{background:white}main{max-width:none;padding:0}section{break-inside:avoid}a{color:inherit}img{max-height:85vh;object-fit:contain}}"
   html <- paste0("<!doctype html><html lang='de'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>",

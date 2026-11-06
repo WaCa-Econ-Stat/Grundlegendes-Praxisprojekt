@@ -1,7 +1,7 @@
 if (.Platform$OS.type == "windows" && !l10n_info()[["UTF-8"]]) {
   Sys.setlocale("LC_CTYPE", "English_United States.utf8")
 }
-for (script in c("00_setup", "00_helpers", "01_prepare_data", "02_build_analysis_data")) {
+for (script in c("00_setup", "00_helpers", "01_prepare_data", "02_build_analysis_data", "02_living_conditions")) {
   source(file.path("code", paste0(script, ".R")), encoding = "UTF-8")
 }
 config <- setup_project()
@@ -45,6 +45,20 @@ pair_fixture <- data.table(country_code = c("AAA", "AAA", "AAA", "BBB"),
 pairs <- build_method_pairs(pair_fixture)
 check(nrow(pairs) == 1 && pairs$difference_pp == -5, "Pairs require identical country and year, with correct percentage-point units")
 check(!pairs$same_survey_acronym && pairs$same_survey_year, "Different surveys remain explicitly flagged")
+
+indicator_fixture <- data.table(country_code = c("AAA", "AAA", "AAA", "BBB", "BBB"), country_name = c("A", "A", "A", "B", "B"),
+  year = c(2019L, 2021L, 2020L, 2020L, 2021L), owid_selected = c(TRUE, TRUE, FALSE, TRUE, TRUE),
+  gini = .3, child_mortality = c(0, 1, 2, NA, 3))
+snapshot_fixture <- indicator_snapshot(indicator_fixture, 2020L, 2L)
+check(snapshot_fixture[country_code == "AAA", year] == 2019L,
+      "Indicator snapshots prefer the earlier tied OWID survey and ignore unselected methods")
+check(snapshot_fixture[country_code == "AAA", child_mortality] == 0 &&
+        snapshot_fixture[country_code == "BBB", year] == 2020L && is.na(snapshot_fixture[country_code == "BBB", child_mortality]),
+      "Indicator selection retains zero and does not switch survey years to fill mortality")
+check(identical(snapshot_fixture$gini_points, c(30, 30)) && !"gini_points" %in% names(indicator_fixture),
+      "Gini scaling does not modify the shared source table")
+check(rank_association(c(1,2,3), c(3,2,1)) == -1 && is.na(rank_association(c(0,0,0), c(1,2,3))),
+      "Rank associations handle direction and undefined constant inputs")
 
 if (!file.exists("data_clean/analysis_data.rds")) stop("First run source('run_all.R').")
 a <- readRDS("data_clean/analysis_data.rds")
@@ -99,6 +113,44 @@ check(isTRUE(all.equal(aggregates[type == "world", child_mortality], world_cm)) 
 check(setequal(a$checksums$file, file.path("data", c("owid_poverty_lines.csv", "worldbank_pip.csv",
                                                     "owid_country_codes.csv", "owid_child_mortality.csv"))),
       "Checksums cover all four shared inputs")
+snapshot <- a$indicator_snapshot
+check(!anyDuplicated(snapshot$country_code) && all(snapshot$owid_selected) &&
+        all(abs(snapshot$year - config$indicator_year) <= config$indicator_tolerance),
+      "Indicator snapshots count countries once and respect OWID and the time window")
+expected_snapshot <- a$surveys[owid_selected == TRUE & abs(year - config$indicator_year) <= config$indicator_tolerance]
+expected_snapshot <- expected_snapshot[order(country_code, abs(year - config$indicator_year), year), .SD[1], by = country_code]
+check(fsetequal(snapshot[, ..survey_key], expected_snapshot[, ..survey_key]),
+      "Snapshot keys follow the closest actual survey year for every available country")
+check(nrow(a$indicator_audit) == nrow(a$catalog) && !anyDuplicated(a$indicator_audit$country_code) &&
+        sum(a$indicator_audit$has_survey) == nrow(snapshot), "The indicator audit retains countries with missing surveys")
+check(identical(snapshot$gini_points, 100 * snapshot$gini) &&
+        all(a$indicator_associations$n > 0) && all(abs(a$indicator_associations$rho) <= 1),
+      "Indicator summaries preserve units and valid correlation bounds")
+check(!anyNA(a$mortality_snapshot$child_mortality) &&
+        isTRUE(all.equal(a$mortality_snapshot$child_mortality,
+                         raw_cm[a$mortality_snapshot, on = .(code = country_code, year), child_mortality_rate])),
+      "Mortality plots use the exact poverty reporting year, without filling missing values")
+panel <- a$mortality_panel
+check(!anyDuplicated(panel, by = c("country_code", "target_year")) &&
+        all(panel[, .N, by = country_code]$N == length(config$mortality_years)) &&
+        all(panel[, .N, by = target_year]$N == uniqueN(panel$country_code)) && !anyNA(panel$child_mortality),
+      "Every mortality time panel contains the same countries with complete matched data")
+case_cm <- a$case_mortality
+check(setequal(case_cm$country_code, a$cases$country_code) &&
+        all(case_cm$mortality_change_pp == case_cm$mortality_end - case_cm$mortality_start),
+      "Mortality case studies reuse the poverty cases and actual endpoint differences")
+for (endpoint in c("start", "end")) {
+  keys <- case_cm[, .(country_code, welfare_type, year = get(paste0(endpoint, "_year")))]
+  expected <- a$surveys[keys, on = .(country_code, welfare_type, year), child_mortality]
+  check(identical(case_cm[[paste0("mortality_", endpoint)]], expected), paste("Mortality case endpoint year", endpoint))
+}
+wealth <- a$higher_gdp_thresholds
+check(all(wealth$reporting_gdp >= config$higher_gdp_cutoff) &&
+        !anyDuplicated(wealth, by = c("country_code", "threshold")) &&
+        all(wealth[, .N, by = country_code]$N == 2L),
+      "Higher-threshold panels use identical countries and their declared GDP cutoff")
+check(all(c(10000, config$higher_gdp_cutoff, 30000) %in% a$higher_gdp_sensitivity$gdp_cutoff),
+      "GDP-group sensitivity is retained rather than selecting only a favorable cutoff")
 check(!anyDuplicated(a$countries$country_code), "One point per country")
 check(all(a$countries$span >= config$min_span & a$countries$n_surveys >= config$min_surveys), "All included series meet the interval and coverage rules")
 check(nrow(a$coverage) == nrow(a$catalog) && !anyDuplicated(a$coverage$country_code), "Each catalog country counts once in method coverage")
@@ -114,9 +166,13 @@ for (i in seq_len(nrow(a$cases))) {
 current <- unname(tools::md5sum(a$checksums$file))
 check(identical(current, a$checksums$md5), "The input files remain unchanged")
 manifest <- fread("output/results/figure_manifest.csv")
-check(nrow(manifest) %in% c(6L, 7L) && all(file.exists(manifest$png)) && all(file.exists(manifest$svg)),
-      "The current manifest contains all six core exports and the optional seventh")
+check(nrow(manifest) %in% c(12L, 13L) && all(file.exists(manifest$png)) && all(file.exists(manifest$svg)) &&
+        all(paste0(sprintf("%02d", 8:13), c("_bip_und_armut", "_ungleichheit_und_armut", "_kindersterblichkeit_und_armut",
+          "_kindersterblichkeit_zeitvergleich", "_kindersterblichkeit_fallbeispiele", "_hoehere_grenze_kindersterblichkeit")) %in% manifest$figure),
+      "The manifest contains twelve core figures and the optional threshold trend")
 check(all(file.size(c(manifest$png, manifest$svg)) > 1000), "Exports contain image data")
 html <- paste(readLines("output/bericht.html", encoding = "UTF-8", warn = FALSE), collapse = "\n")
 check(length(gregexpr("data:image/png;base64,", html, fixed = TRUE)[[1]]) == nrow(manifest), "The report embeds every current figure for offline use")
+check(grepl("Wirtschaftliche Lebensbedingungen", html, fixed = TRUE) && grepl("Gesundheit und Kindersterblichkeit", html, fixed = TRUE) &&
+        grepl("Zusammenhänge und ihre Grenzen", html, fixed = TRUE), "The report includes the living-conditions chapters and interpretation limits")
 cat("Passed ", checks, " checks.\n", sep = "")
