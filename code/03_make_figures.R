@@ -72,8 +72,7 @@ make_figures <- function(a, config) {
   setorder(cases, change_pp)
   cases[, country := factor(country_code, levels = rev(country_code))]
   cases[, color := ifelse(change_pp > 0, accent, ink)]
-  cases[, value_label := paste0(fmt(abs(change_pp)), " Punkte",
-                                 ifelse(change_pp < 0, "\nweniger", ifelse(change_pp > 0, "\nmehr", "")))]
+  cases[, value_label := pp_label(change_pp)]
   falling <- cases[change_pp < 0]
   rising <- cases[change_pp > 0]
   takeaway <- if (nrow(falling) && nrow(rising)) {
@@ -87,7 +86,7 @@ make_figures <- function(a, config) {
     scale_y_discrete(labels = setNames(cases$label, cases$country_code)) +
     scale_x_continuous(expand = expansion(mult = c(.23, .23))) +
     labs(subtitle = "Drei anhand der Daten ausgewählte Länder. Blau: Rückgang. Rot: Anstieg.",
-         x = "Änderung des Anteils unter 3 int. Dollar pro Tag (Prozentpunkte)", y = NULL,
+         x = "Veränderung der Armutsquote (Prozentpunkte)", y = NULL,
          caption = paste0(source, "\nDrei Fälle aus ", nrow(a$countries),
                           " vergleichbaren Länderreihen. Die tatsächlichen Zeiträume stehen bei den Ländern.\nAbsolute Veränderungen, keine jährlichen Raten. Die Auswahl ist keine vollständige weltweite Rangliste.")) +
     analysis_theme() + theme(panel.grid.major.y = element_blank(),
@@ -145,12 +144,10 @@ make_figures <- function(a, config) {
   method_levels <- c("Einkommen", "Konsum", "Beide", "Keine aktuelle Erhebung")
   coverage[, method := factor(method, levels = method_levels)]
   coverage[, label := ifelse(share_pct >= 8, paste0(fmt(share_pct, 0), " %"), "")]
-  coverage[share_pct >= 15 & method %in% c("Einkommen", "Konsum"),
-           label := paste0(label, "\n", method)]
   coverage[, text_color := ifelse(method == "Keine aktuelle Erhebung", "#283545", "white")]
   coverage[, region := factor(region_code, levels = c("SSF", "ECS"))]
   region_n <- coverage[, .(n = region_n[1]), by = region_code]
-  region_labels <- setNames(paste0(c("Europa und Zentralasien", "Subsahara-Afrika"), "\n(",
+  region_labels <- setNames(paste0(c("Europa und Zentralasien", "Subsahara-Afrika"), "\n(n = ",
                                    region_n$n[match(c("ECS", "SSF"), region_n$region_code)], " Länder)"), c("ECS", "SSF"))
   takeaway <- "In Europa und Zentralasien überwiegen Einkommensdaten,\nin Subsahara-Afrika Konsumdaten"
   p <- ggplot(coverage, aes(region, share_pct, fill = method, group = method)) +
@@ -164,8 +161,7 @@ make_figures <- function(a, config) {
     scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 25), labels = percent_labels, expand = c(0, 0)) +
     coord_flip() +
     labs(subtitle = paste0("Jüngstes verfügbares nationales Erhebungsjahr je Land, ", config$coverage_start, "–", config$end_year),
-         x = NULL, y = paste0("Anteil der Länder nach Art ihrer jüngsten Erhebung\n",
-                             config$coverage_start, "–", config$end_year),
+         x = NULL, y = "Anteil der im Datensatz vertretenen Länder",
          caption = paste(source, "\nZwei Regionen verdeutlichen den Unterschied. Jedes Land zählt einmal. Grau: keine Erhebung im betrachteten Fenster.\nDie vollständige Übersicht aller sieben Regionen steht in coverage_counts.csv.")) +
     analysis_theme() + theme(axis.text.y = element_text(size = 13))
   write_table(coverage[, .(region_code, method, n, region_n, share_pct)], "coverage_focus_plot_data")
@@ -177,23 +173,18 @@ make_figures <- function(a, config) {
   summary[, country := factor(country_code, levels = country_code)]
   summary[, color := ifelse(median_pp > 0, ink, "#A0523A")]
   summary[, label := pp_label(median_pp)]
-  summary[, country_label := paste0(country_de, " (", n_pairs,
-                                    ifelse(n_pairs == 1L, " Vergleichsjahr)", " Vergleichsjahre)"))]
   income_higher <- sum(summary$median_pp > 0)
   takeaway <- paste0("In ", income_higher, " von ", nrow(summary),
                     " Ländern ist die einkommensbasierte Armutsquote im Median höher")
   p <- ggplot(summary, aes(median_pp, country)) +
     geom_vline(xintercept = 0, color = "#77848F", linewidth = .6) +
-    geom_col(aes(fill = color), width = .63) +
-    scale_fill_identity(breaks = c("#A0523A", ink),
-                        labels = c("Höhere Quote bei Konsum", "Höhere Quote bei Einkommen"),
-                        name = NULL, guide = "legend") +
+    geom_col(aes(fill = color), width = .63) + scale_fill_identity() +
     geom_text(aes(label = label, hjust = ifelse(median_pp >= 0, -.12, 1.12)), size = 3.7) +
-    scale_y_discrete(labels = setNames(summary$country_label, summary$country_code)) +
+    scale_y_discrete(labels = setNames(paste0(summary$country_de, " (n = ", summary$n_pairs, ")"), summary$country_code)) +
     scale_x_continuous(expand = expansion(mult = c(.2, .18))) +
     labs(subtitle = "Ein Balken pro Land: Median der Jahresdifferenzen. Positive Werte bedeuten eine höhere Einkommensquote.",
-         x = "Unterschied der Armutsquoten (Prozentpunkte)", y = NULL,
-         caption = paste0(source, "\n", nrow(a$method_pairs), " Land-Jahr-Paare. Am Ländernamen steht die Zahl der verfügbaren Vergleichsjahre.\nUnterschiedliche Befragungen verhindern die Interpretation als isolierten Methodeneffekt. Einzelwerte stehen in method_pairs.csv.")) +
+         x = "Einkommensbasierte minus konsumbasierte Armutsquote (Prozentpunkte)", y = NULL,
+         caption = paste0(source, "\n", nrow(a$method_pairs), " Land-Jahr-Paare. n gibt die verfügbaren Vergleichsjahre je Land an.\nUnterschiedliche Befragungen verhindern die Interpretation als isolierten Methodeneffekt. Einzelwerte stehen in method_pairs.csv.")) +
     analysis_theme() + theme(panel.grid.major.y = element_blank(),
                             panel.grid.major.x = element_line(color = "#DFE4E8", linewidth = .3))
   write_table(summary[, .(country_code, country_de, n_pairs, start_year, end_year, median_pp)], "method_medians_plot_data")

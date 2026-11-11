@@ -11,7 +11,6 @@ make_living_conditions_figures <- function(a, config) {
   source_pip <- "Daten: Weltbank PIP, Kursdatensatz. Eigene Auswertung; Gestaltung inspiriert von Our World in Data."
   source_health <- "Daten: Weltbank PIP und UN IGME/Gapminder via OWID, Kursdatensatz. Eigene Auswertung."
   period <- paste0("Um ", config$indicator_year, " (±", config$indicator_tolerance, " Jahre)")
-  mortality_axis <- "Todesfälle vor dem 5. Geburtstag je 100 Lebendgeburten"
   number_labels <- function(z) fmt(z, if (all(abs(z - round(z)) < 1e-8, na.rm = TRUE)) 0L else 1L)
   region_colors <- setNames(a$regions$color, a$regions$region_code)
   region_names <- setNames(c("Ostasien und Pazifik", "Südasien", "Subsahara-Afrika",
@@ -41,7 +40,7 @@ make_living_conditions_figures <- function(a, config) {
   fills <- function() scale_fill_manual(values = region_colors, labels = region_names, name = "Weltbankregion")
   colors <- function() scale_color_manual(values = region_colors, labels = region_names, guide = "none")
   population_sizes <- function() scale_size_area(max_size = 15, breaks = c(1e7, 1e8, 1e9),
-                                               labels = c("10 Mio.", "100 Mio.", "1 Mrd."), name = "Bevölkerung je Land\n(Kreisfläche)")
+                                               labels = c("10 Mio.", "100 Mio.", "1 Mrd."), name = "Bevölkerung")
   bubble_guides <- function() guides(fill = guide_legend(order = 1, override.aes = list(size = 4, alpha = 1)),
                                      size = guide_legend(order = 2, override.aes = list(fill = "#ADB8C1", alpha = .8)))
   case_points <- function(x) x[country_code %in% a$cases$country_code]
@@ -62,8 +61,7 @@ make_living_conditions_figures <- function(a, config) {
                   expand = expansion(mult = c(.04, .08))) +
     scale_y_continuous(limits = c(0, 100), labels = percent_labels) +
     labs(subtitle = paste0(period, " · ", nrow(x), " Länder · Punktfläche entspricht der Bevölkerung"),
-         x = "BIP je Einwohner und Jahr (US-Dollar von 2015, logarithmische Skala)",
-         y = "Bevölkerung unter 3 int. Dollar pro Tag",
+         x = "BIP pro Kopf und Jahr (US-Dollar von 2015; logarithmische Skala)", y = "Bevölkerung unter 3 int. Dollar pro Tag",
          caption = caption(source_pip, "Jedes Land ist einmal vertreten. Beschriftet sind die drei bisherigen Fallbeispiele. Gleiche Abstände auf der BIP-Achse bedeuten gleiche Faktoren; BIP ist nicht kaufkraftbereinigt.")) + owid_theme()
   write_table(x[, .(country_code, country_de, year, region_code, reporting_pop, reporting_gdp, pct_below_3)], "gdp_bubbles_plot_data")
   export(p, "08_bip_und_armut", "Wie hängt wirtschaftliche Leistung mit extremer Armut zusammen?", takeaway,
@@ -106,7 +104,7 @@ make_living_conditions_figures <- function(a, config) {
     scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 20), labels = percent_labels) +
     scale_y_continuous(limits = c(0, NA), labels = number_labels, expand = expansion(mult = c(.02, .1))) +
     labs(subtitle = paste0(period, " · ", nrow(x), " Länder · Armut und Kindersterblichkeit aus demselben Berichtsjahr"),
-         x = "Bevölkerung unter 3 int. Dollar pro Tag", y = mortality_axis,
+         x = "Bevölkerung unter 3 int. Dollar pro Tag", y = "Kindersterblichkeit (je 100 Lebendgeburten)",
          caption = caption(source_health, "Kindersterblichkeit: Todesfälle vor dem fünften Geburtstag. Ein Punkt pro Land, Fläche nach Bevölkerung. Die Darstellung vergleicht Länder und belegt keine individuelle Wirkung.")) + owid_theme()
   write_table(x[, .(country_code, country_de, year, region_code, reporting_pop, pct_below_3, child_mortality)], "mortality_bubbles_plot_data")
   export(p, "10_kindersterblichkeit_und_armut", "Wie hängen extreme Armut und das Überleben von Kindern zusammen?", takeaway,
@@ -117,10 +115,9 @@ make_living_conditions_figures <- function(a, config) {
   x <- copy(a$mortality_groups)
   first_year <- min(x$target_year); last_year <- max(x$target_year); span <- last_year - first_year
   group_colors <- c(high = "#873C5B", lower = "#2C846E")
-  group_names <- c(high = paste0("Um ", first_year, " mindestens 30 % der Menschen\nin extremer Armut"),
-                   lower = paste0("Um ", first_year, " unter 30 % der Menschen\nin extremer Armut"))
+  group_names <- c(high = "Anfangs ab 30 % in extremer Armut", lower = "Anfangs unter 30 % in extremer Armut")
   first <- x[target_year == first_year]; last <- x[target_year == last_year]
-  last[, label := paste0(group_names[poverty_group], "\n", fmt(mortality_median), " je 100 · ", n, " Länder")]
+  last[, label := paste0(group_names[poverty_group], "\n", fmt(mortality_median), " je 100 · n = ", n)]
   takeaway <- if (all(last$mortality_median[match(first$poverty_group, last$poverty_group)] < first$mortality_median))
     "Die Kindersterblichkeit sank in beiden Armutsgruppen deutlich" else
     "Die Armutsgruppen unterscheiden sich in der Entwicklung der Kindersterblichkeit"
@@ -133,8 +130,7 @@ make_living_conditions_figures <- function(a, config) {
     scale_x_continuous(limits = c(first_year, last_year + span * .56), breaks = sort(unique(x$target_year))) +
     scale_y_continuous(limits = c(0, NA), labels = number_labels, expand = expansion(mult = c(.02, .15))) +
     labs(subtitle = paste0("Dieselben ", uniqueN(a$mortality_panel$country_code), " Länder in allen Fenstern · Gruppen nach der Armutsquote um ", first_year, " fixiert"),
-         x = paste0("Zieljahr (Erhebungen jeweils innerhalb ±", config$indicator_tolerance, " Jahren)"),
-         y = paste0(mortality_axis, "\nTypischer Wert je Ländergruppe (Median)"),
+         x = paste0("Zieljahr (Erhebungen jeweils innerhalb ±", config$indicator_tolerance, " Jahren)"), y = "Kindersterblichkeit: Median der Länder (je 100 Lebendgeburten)",
          caption = caption(source_health, "Ungewichtete Ländermediane, keine bevölkerungsgewichteten Gruppenquoten. Nur die drei gezeigten Zeitfenster sind berechnet; Linien verbinden diese Punkte. Länder wechseln die Gruppe nicht.")) + owid_theme()
   export(p, "11_kindersterblichkeit_zeitvergleich", "Wie entwickelte sich Kindersterblichkeit in anfangsärmeren Ländern?", takeaway,
     paste0("Nach dem Vorbild direkt beschrifteter OWID-Gruppenverläufe werden dieselben ", uniqueN(a$mortality_panel$country_code),
@@ -143,10 +139,9 @@ make_living_conditions_figures <- function(a, config) {
 
   # 12. One counterexample, two separately labelled, zero-based scales; no dual axis.
   x <- copy(a$mortality_focus)
-  label <- country_labels(unique(x$country_name))
+  code <- unique(x$country_code); label <- country_labels(unique(x$country_name))
   x[, panel := factor(indicator, levels = c("poverty_pct", "child_mortality"),
-                       labels = c(paste0(label, " · Bevölkerung unter 3 int. Dollar pro Tag (%)"),
-                                  paste0("Kindersterblichkeit · ", mortality_axis)))]
+                       labels = c("Extreme Armut · Anteil unter 3 Dollar (%)", "Kindersterblichkeit · Todesfälle je 100 Lebendgeburten"))]
   endpoints <- x[year %in% range(year)]
   anchors <- x[, .(year = min(year), value = 0), by = panel]
   labels <- endpoints[, .(panel, indicator, year, value, label = paste0(fmt(value), ifelse(indicator == "poverty_pct", " %", " je 100")))]
@@ -163,7 +158,7 @@ make_living_conditions_figures <- function(a, config) {
     scale_x_continuous(breaks = sort(unique(x$year)), expand = expansion(mult = c(.05, .05))) +
     scale_y_continuous(labels = number_labels, expand = expansion(mult = c(.02, .22))) +
     labs(subtitle = paste0(label, " · ", min(x$year), "–", max(x$year), " · zwei Indikatoren, dieselben Berichtsjahre"),
-         x = "Berichtsjahr", y = NULL,
+         x = NULL, y = NULL,
          caption = caption(source_health, "Die Felder haben unterschiedliche y-Skalen und beginnen bei null. Punkte markieren die nationalen Erhebungsjahre. Die zeitliche Gegenüberstellung bestimmt keine Ursache.")) + owid_theme()
   export(p, "12_kindersterblichkeit_fallbeispiele", "Müssen Armut und Kindersterblichkeit denselben Verlauf nehmen?", takeaway,
     paste0("Die Grafik konzentriert sich auf ", label, " als Gegenbeispiel aus den bereits ausgewählten Fällen. Beide Verläufe verwenden genau dieselben Berichtsjahre innerhalb des vergleichbaren Armutsintervalls. Die Felder beginnen bei null, haben aber unterschiedliche Skalen: Richtungen sind vergleichbar, Steigungen nicht. Die Daten zu allen drei ursprünglichen Fällen bleiben exportiert."),
@@ -175,29 +170,26 @@ make_living_conditions_figures <- function(a, config) {
   x[, panel := factor(threshold, levels = c("pct_below_3", "pct_below_40"),
                        labels = c("Unter 3 int. Dollar pro Tag", "Unter 40 int. Dollar pro Tag"))]
   highlight <- x[order(-reporting_pop), head(.SD, 3L), by = threshold]
-  sample_context <- paste0(uniqueN(x$country_code), " Länder um ", config$indicator_year, " mit BIP ab ",
-                           fmt(config$higher_gdp_cutoff, 0), " US-Dollar je Einwohner")
   strong <- any(abs(a$higher_gdp_associations$rho) >= .3, na.rm = TRUE)
   takeaway <- if (!strong) "Auch bei 40 Dollar bleibt der Zusammenhang zur Kindersterblichkeit schwach" else
     "Die Armutsgrenze verändert den Zusammenhang in der Gruppe mit höherem BIP"
   p <- ggplot(x, aes(poverty_pct, child_mortality)) +
     geom_point(aes(fill = region_code), shape = 21, size = 4, color = "white", stroke = .3, alpha = .85) +
-    geom_label(data = highlight, aes(label = country_de, color = region_code,
-                                     hjust = ifelse(threshold == "pct_below_3", -.12, .5)),
+    geom_label(data = highlight, aes(label = country_de, color = region_code, hjust = ifelse(poverty_pct == max(poverty_pct), 1, .5)),
                vjust = -1, size = 3.3, fill = "white", linewidth = 0, show.legend = FALSE) +
-    facet_wrap(~panel, nrow = 1) + fills() + colors() +
-    scale_x_continuous(limits = c(0, NA), labels = percent_labels, expand = expansion(mult = c(.02, .12))) +
+    facet_wrap(~panel, nrow = 1, scales = "free_x") + fills() + colors() +
+    scale_x_continuous(limits = c(0, NA), labels = function(z) paste0(fmt(z, 1), " %"), expand = expansion(mult = c(.02, .12))) +
     scale_y_continuous(limits = c(0, NA), labels = number_labels, expand = expansion(mult = c(.02, .2))) +
     labs(subtitle = paste0("Dieselben ", uniqueN(x$country_code), " Länder · BIP ab ", fmt(config$higher_gdp_cutoff, 0), " US-Dollar pro Kopf · ", period),
-         x = paste0("Bevölkerung unter der jeweiligen Armutsgrenze\n", sample_context), y = mortality_axis,
+         x = "Bevölkerungsanteil unter der jeweiligen Grenze (verschiedene x-Skalen)", y = "Kindersterblichkeit (je 100 Lebendgeburten)",
          caption = caption(source_health, "BIP in Preisen von 2015; eigene Gruppe, keine Weltbank-Einkommensklasse. Beschriftet: die drei bevölkerungsreichsten Länder dieser Gruppe. Andere BIP-Abgrenzungen zeigen zum Teil stärkere Zusammenhänge.")) +
     owid_theme() + theme(legend.position = "bottom") + guides(fill = guide_legend(nrow = 1))
   explanation <- if (!strong) paste0("In der Gruppe ab ", fmt(config$higher_gdp_cutoff, 0),
     " US-Dollar BIP bleibt der Zusammenhang zur Kindersterblichkeit bei beiden Grenzen schwach.") else
     "Stärke und Richtung des Zusammenhangs hängen von der Grenze und der gewählten BIP-Gruppe ab."
   export(p, "13_hoehere_grenze_kindersterblichkeit", "Hilft eine höhere Armutsgrenze beim Vergleich von Ländern mit höherem BIP?", takeaway,
-    paste("Beide Felder zeigen dieselben Länder und Jahre auf identischen Achsen. Beschriftet sind die drei bevölkerungsreichsten Länder der Auswahl.",
+    paste("Die beiden Felder zeigen dieselben Länder und Jahre mit regionalen Farben. Beschriftet sind die drei bevölkerungsreichsten Länder dieser Auswahl.",
       explanation, "Der Bericht zeigt zusätzlich andere BIP-Abgrenzungen. Die 40-Dollar-Grenze bezeichnet hier keine extreme Armut."),
-    ref_scatter, "Regionale Länderfarben und direkte Ländernamen. Beide Felder zeigen dieselben Länder auf identischen Achsen.", height = 8.5)
+    ref_scatter, "Regionale Länderfarben und direkte Ländernamen. Eigener Vergleich zweier Grenzen mit identischer Stichprobe und gemeinsamer Sterblichkeitsskala.", height = 8.5)
   figures
 }
