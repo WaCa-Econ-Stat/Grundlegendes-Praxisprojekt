@@ -34,6 +34,8 @@ build_report <- function(a, figures, config) {
     png <- figures$png[i]
     raw <- readBin(png, what = "raw", n = file.info(png)$size)
     img <- paste0("data:image/png;base64,", jsonlite::base64_enc(raw))
+    context <- paste(figures$context[i], collapse = " ")
+    context <- if (nzchar(context)) paste0("<figcaption>", html_escape(context), "</figcaption>") else ""
     reference <- ""
     if ("owid_reference" %in% names(figures) && !is.na(figures$owid_reference[i]) && nzchar(figures$owid_reference[i])) {
       reference <- paste0("<p class='chart-reference'><a href='", html_escape(figures$owid_reference[i]),
@@ -41,7 +43,7 @@ build_report <- function(a, figures, config) {
     }
     paste0(introduction, "<section id='grafik-", i, "'><p class='section-number'>Grafik ", i, "</p><h2 class='sr-only'>",
            html_escape(figures$takeaway[i]), "</h2>",
-           "<figure><img src='", img, "' alt='", html_escape(figures$takeaway[i]), "'></figure>",
+           "<figure><img src='", img, "' alt='", html_escape(figures$takeaway[i]), "'>", context, "</figure>",
            "<p class='interpretation'>", html_escape(explanations[i]), "</p>", reference, "</section>")
   }, character(1))
   excluded <- a$candidates[eligible == FALSE, .(Reihen = .N), by = .(Grund = reason)]
@@ -110,5 +112,14 @@ build_report <- function(a, figures, config) {
   writeLines(enc2utf8(html), "output/bericht.html", useBytes = TRUE)
   writeLines(enc2utf8(c("# Ergebnisse", "", findings, "", "## Fallauswahl", "",
                          capture.output(print(cases, row.names = FALSE)))), "output/ergebnisse.md", useBytes = TRUE)
+  title_suggestions <- lapply(seq_len(nrow(figures)), function(i) {
+    note <- paste(figures$source_note[i], collapse = " ")
+    c(paste0("## `", figures$figure[i], "`"), "",
+      paste0("**", figures$takeaway[i], "**"), "",
+      paste(figures$context[i], collapse = " "), "",
+      trimws(gsub("[[:space:]]+", " ", note)), "")
+  })
+  writeLines(enc2utf8(c("# Titelvorschläge für die Grafiken", "", unlist(title_suggestions))),
+             "output/grafiktitel.md", useBytes = TRUE)
   invisible("output/bericht.html")
 }

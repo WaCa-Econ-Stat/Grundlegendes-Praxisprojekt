@@ -19,11 +19,6 @@ make_living_conditions_figures <- function(a, config) {
   owid_theme <- function() {
     theme_minimal(base_size = 14, base_family = "sans") + theme(
       text = element_text(color = "#555555"),
-      plot.title = element_text(family = "serif", size = 25, face = "bold", color = "#303030",
-                                lineheight = 1.1, margin = margin(b = 10)),
-      plot.subtitle = element_text(size = 13, lineheight = 1.2, margin = margin(b = 20)),
-      plot.caption = element_text(size = 9, hjust = 0, lineheight = 1.2, margin = margin(t = 18)),
-      plot.title.position = "plot", plot.caption.position = "plot",
       panel.grid.minor = element_blank(),
       panel.grid.major = element_line(color = "#DDDDDD", linewidth = .35, linetype = "dashed"),
       panel.grid.major.x = element_blank(), axis.title = element_text(size = 12),
@@ -35,18 +30,9 @@ make_living_conditions_figures <- function(a, config) {
       plot.background = element_rect(fill = "white", color = NA))
   }
   caption <- function(source, note) paste(source, paste(strwrap(note, width = 155), collapse = "\n"), sep = "\n")
-  headline <- function(text) {
-    lines <- strwrap(text, width = 69)
-    if (length(lines) == 2L && nchar(lines[2L]) < 24L) {
-      words <- strsplit(text, " ", fixed = TRUE)[[1L]]
-      split <- which.min(abs(cumsum(nchar(words) + 1L) - (nchar(text) + 1L) / 2))
-      lines <- c(paste(words[seq_len(split)], collapse = " "), paste(words[-seq_len(split)], collapse = " "))
-    }
-    paste(lines, collapse = "\n")
-  }
   export <- function(plot, name, question, takeaway, explanation, reference, design_note,
                      height = 8, section = "Gesundheit und Kindersterblichkeit") {
-    out <- save_figure(plot + labs(title = headline(takeaway)), name, config, height = height)
+    out <- save_figure(plot, name, config, height = height)
     out[, `:=`(question = question, takeaway = takeaway, explanation = explanation, section = section,
                owid_reference = reference, design_note = design_note)]
     figures[[length(figures) + 1L]] <<- out

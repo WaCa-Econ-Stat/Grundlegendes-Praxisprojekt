@@ -37,11 +37,6 @@ analysis_theme <- function() {
   ggplot2::theme_minimal(base_size = 14, base_family = "sans") +
     ggplot2::theme(
       text = ggplot2::element_text(color = "#283545"),
-      plot.title = ggplot2::element_text(size = 23, face = "bold", margin = ggplot2::margin(b = 9)),
-      plot.subtitle = ggplot2::element_text(size = 12.5, lineheight = 1.2, margin = ggplot2::margin(b = 18)),
-      plot.caption = ggplot2::element_text(size = 9, hjust = 0, color = "#586674", lineheight = 1.15,
-                                         margin = ggplot2::margin(t = 17)),
-      plot.title.position = "plot", plot.caption.position = "plot",
       axis.title = ggplot2::element_text(size = 12), axis.text = ggplot2::element_text(size = 11),
       panel.grid.minor = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_blank(),
       panel.grid.major.y = ggplot2::element_line(color = "#DFE4E8", linewidth = .3),
@@ -55,6 +50,9 @@ analysis_theme <- function() {
 }
 
 save_figure <- function(plot, name, config, width = 14, height = 8) {
+  context <- paste(plot$labels$subtitle, collapse = " ")
+  source_note <- paste(plot$labels$caption, collapse = "\n")
+  plot <- plot + ggplot2::labs(title = NULL, subtitle = NULL, caption = NULL)
   folder <- "output/figures"
   targets <- file.path(folder, paste0(name, c(".png", ".svg")))
   # Render into the local temporary directory before copying into Proton Drive.
@@ -71,5 +69,6 @@ save_figure <- function(plot, name, config, width = 14, height = 8) {
     unlink(temporary)
     if (!copied || !file.exists(targets[i]) || file.size(targets[i]) <= 0) stop("Export fehlgeschlagen: ", targets[i])
   }
-  data.table::data.table(figure = name, png = targets[1], svg = targets[2], width = width, height = height)
+  data.table::data.table(figure = name, png = targets[1], svg = targets[2], width = width, height = height,
+                         context = context, source_note = source_note)
 }

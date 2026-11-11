@@ -18,7 +18,7 @@ Die Darstellung folgt der Aussage, die das Publikum mitnehmen soll. Die Titel ne
 | 12 | In Simbabwe sank Kindersterblichkeit trotz steigender Armut. | Zwei Verläufe untereinander für dieselben Erhebungsjahre; getrennte, bei null beginnende y-Skalen. |
 | 13 | Eine höhere Armutsgrenze zeigt in der Gruppe mit höherem BIP keinen automatisch stärkeren Gesundheitszusammenhang. | Dieselben 26 Länder unter 3- und 40-Dollar-Grenze; regionale Farben und direkte Ländernamen. |
 
-Die tatsächlichen Titel und Zahlen werden bei jedem Lauf aus den vorhandenen Daten erzeugt und im Abbildungsmanifest unter `takeaway` gespeichert. Die Interpretation gilt für den angegebenen Zeitraum und die jeweilige Datenauswahl.
+Bei jedem Lauf entstehen Titelvorschläge in `output/grafiktitel.md` und im Abbildungsmanifest unter `takeaway`. Die Interpretation gilt für den angegebenen Zeitraum und die jeweilige Datenauswahl.
 
 Die vollständigen Einzeljahre, Länder, Regionen und Auswahlentscheidungen bleiben in den exportierten Tabellen verfügbar. Der Bericht zeigt die Grafiken in dieser Reihenfolge und erläutert die methodischen Grenzen anschließend.
 

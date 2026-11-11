@@ -27,6 +27,7 @@ Im Terminal funktioniert `Rscript --vanilla run_all.R`. Das Skript findet den Pr
 - **`output/bericht.html`**: Bericht mit allen Grafiken, zentralen Aussagen, Fallauswahl und Grenzen. Die Grafiken sind eingebettet. Die HTML-Datei lässt sich einzeln weitergeben und offline öffnen.
 - **`output/figures/`**: dreizehn Grafiken als PNG und SVG. Die SVG-Dateien lassen sich verlustfrei skalieren.
 - **`output/ergebnisse.md`**: kurze Ergebnisübersicht.
+- **`output/grafiktitel.md`** enthält zu jeder Grafik einen Titelvorschlag, den Kontext und die Quellenangabe. Die Dateinamen ordnen den Text dem jeweiligen PNG und SVG zu.
 - **`output/tables/`**: Datengrundlagen der Grafiken, Auswahl- und Ausschlussentscheidungen, Methodenpaare und Empfindlichkeit gegenüber den Zeitfenstern.
 - **`output/results/`**: Abbildungsmanifest, Konfiguration, Datenprüfungen, Prüfsummen der Eingaben und verwendete R-Sitzung.
 
@@ -60,7 +61,7 @@ Die Datenaufbereitung kommt unverändert aus `roterFaden`, Stand `cb83cb8` (`R/0
 | `12_kindersterblichkeit_fallbeispiele` | Simbabwe: Armuts- und Sterblichkeitsverlauf untereinander, dieselben Jahre |
 | `13_hoehere_grenze_kindersterblichkeit` | 3- und 40-Dollar-Grenze, regionale Farben und direkte Ländernamen |
 
-Jede Grafik stellt eine zentrale Aussage in den Titel. Die Darstellung zeigt die dafür nötigen Vergleiche mit direkten Beschriftungen. Das Manifest enthält die Aussage im Feld `takeaway` und die zugehörige kurze Erläuterung. Vollständige Länder- und Jahresdaten bleiben in den Tabellen erhalten.
+Die Grafikdateien zeigen Achsen, Legenden und direkte Datenbeschriftungen. Die Titelvorschläge stehen in `output/grafiktitel.md` und im Manifest unter `takeaway`. Vollständige Länder- und Jahresdaten stehen in den Tabellen.
 
 Die sechs Grafiken zu Lebensbedingungen sind an konkreten OWID-Darstellungen orientiert: regionale Länderfarben, Bevölkerung als Punktfläche, direkt beschriftete Linien und ruhige Achsen. Der Bericht verlinkt unter jeder dieser Grafiken die Vorlage und erläutert die Anpassung. `owid_reference` und `design_note` im Manifest dokumentieren dies ebenfalls. Die Umsetzung ist eigener R-Code; Messwerte, Weltbankregionen und Erhebungsauswahl stammen weiterhin aus unserem Kursprojekt.
 

@@ -4,12 +4,8 @@ make_figures <- function(a, config) {
   muted <- "#A7B1BA"
   source <- config$source
   figures <- list()
-  headline <- function(x) paste(vapply(strsplit(x, "\n", fixed = TRUE)[[1]], function(line) {
-    paste(strwrap(line, width = 76), collapse = "\n")
-  }, character(1)), collapse = "\n")
   pp_label <- function(x) paste0(ifelse(x > 0, "+", ifelse(x < 0, "−", "")), fmt(abs(x)), " PP")
   export <- function(plot, name, question, takeaway, explanation, height = 8) {
-    plot <- plot + labs(title = headline(takeaway))
     out <- save_figure(plot, name, config, height = height)
     out[, `:=`(question = question, takeaway = gsub("\n", " ", takeaway, fixed = TRUE), explanation = explanation,
                section = "Armut und Messung")]
@@ -33,7 +29,7 @@ make_figures <- function(a, config) {
     scale_y_continuous(limits = c(0, ceiling(max(world$below_3) / 10) * 10), labels = percent_labels) +
     labs(subtitle = paste0(config$start_year, "–", config$end_year,
                            ": Anteil unter 3 internationalen Dollar pro Tag, Kaufkraft von 2021"),
-         x = NULL, y = "Anteil der Weltbevölkerung",
+         x = NULL, y = "Weltbevölkerung unter 3 int. Dollar pro Tag",
          caption = paste(source, "\nWeltwerte sind modellierte Aggregate.")) + analysis_theme()
   export(p, "01_weltweiter_verlauf", "Wie hat sich extreme Armut weltweit verändert?", takeaway,
          "Die Linie zeigt den weltweiten Rückgang. Die hervorgehobenen Endpunkte geben dessen Größenordnung an. Weltwerte sind modelliert.")
@@ -179,7 +175,7 @@ make_figures <- function(a, config) {
   summary[, label := pp_label(median_pp)]
   income_higher <- sum(summary$median_pp > 0)
   takeaway <- paste0("In ", income_higher, " von ", nrow(summary),
-                    " Ländern ist die Einkommensquote im Median höher")
+                    " Ländern ist die einkommensbasierte Armutsquote im Median höher")
   p <- ggplot(summary, aes(median_pp, country)) +
     geom_vline(xintercept = 0, color = "#77848F", linewidth = .6) +
     geom_col(aes(fill = color), width = .63) + scale_fill_identity() +
@@ -187,7 +183,7 @@ make_figures <- function(a, config) {
     scale_y_discrete(labels = setNames(paste0(summary$country_de, " (n = ", summary$n_pairs, ")"), summary$country_code)) +
     scale_x_continuous(expand = expansion(mult = c(.2, .18))) +
     labs(subtitle = "Ein Balken pro Land: Median der Jahresdifferenzen. Positive Werte bedeuten eine höhere Einkommensquote.",
-         x = "Unterschied der Armutsquoten (Prozentpunkte)", y = NULL,
+         x = "Einkommensbasierte minus konsumbasierte Armutsquote (Prozentpunkte)", y = NULL,
          caption = paste0(source, "\n", nrow(a$method_pairs), " Land-Jahr-Paare. n gibt die verfügbaren Vergleichsjahre je Land an.\nUnterschiedliche Befragungen verhindern die Interpretation als isolierten Methodeneffekt. Einzelwerte stehen in method_pairs.csv.")) +
     analysis_theme() + theme(panel.grid.major.y = element_blank(),
                             panel.grid.major.x = element_line(color = "#DFE4E8", linewidth = .3))
