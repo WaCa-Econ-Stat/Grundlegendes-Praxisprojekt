@@ -1,0 +1,231 @@
+% Overleaf-Hauptdatei. Namen und Datum stehen in den Befehlen \author und \date.
+% Die ZIP enthält den Ordner figures mit den PNG-Dateien für die Grafikfolien.
+\documentclass[aspectratio=32,12pt,t]{beamer}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+\fi
+\usepackage[ngerman]{babel}
+\usepackage[default]{sourcesanspro}
+\usepackage{graphicx}
+\graphicspath{{figures/}{../output/figures/}{output/figures/}}
+
+\definecolor{Textfarbe}{HTML}{222222}
+\definecolor{Fussfarbe}{HTML}{777777}
+\definecolor{Linkfarbe}{HTML}{2A76DD}
+\setbeamercolor{normal text}{fg=Textfarbe,bg=white}
+\setbeamercolor{structure}{fg=Textfarbe}
+\setbeamercolor{frametitle}{fg=Textfarbe}
+\setbeamerfont{frametitle}{size=\Large,series=\bfseries}
+\setbeamerfont{title}{size=\huge,series=\bfseries}
+\setbeamersize{text margin left=8mm,text margin right=8mm}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamertemplate{subsection in toc}{\leavevmode\hspace*{1.5em}\inserttocsubsection\par}
+\setbeamertemplate{section in toc shaded}[default][38]
+\setbeamertemplate{subsection in toc shaded}[default][38]
+\hypersetup{colorlinks=true,linkcolor=.,urlcolor=Linkfarbe}
+
+% Das Logo stammt aus der Beispielpräsentation.
+\setbeamertemplate{headline}{%
+  \vbox to 0pt{%
+    \vskip 2.5mm
+    \hbox to \paperwidth{%
+      \hfil\IfFileExists{lmu-logo.png}{\includegraphics[width=10mm]{lmu-logo.png}}{}\hskip 5mm}%
+    \vss}%
+}
+\setbeamertemplate{frametitle}{%
+  \vspace*{2.5mm}%
+  \noindent\parbox[t]{\dimexpr\textwidth-10mm\relax}{%
+    \raggedright\usebeamerfont{frametitle}\insertframetitle\par}%
+  \par\vspace{1.5mm}%
+}
+\setbeamertemplate{footline}{%
+  \hbox to \paperwidth{\hfil{\color{Fussfarbe}\scriptsize\insertframenumber}\hskip 5mm}%
+  \vskip 2mm%
+}
+
+\title{Leben unter 3 Dollar am Tag}
+\subtitle{Extreme Armut weltweit seit 1990}
+\author{[Namen der Gruppenmitglieder]}
+\institute{Grundlegendes Praxisprojekt\\Institut für Statistik, LMU München}
+\date{Wintersemester 2026/27}
+
+\newcommand{\Agenda}[1][]{%
+  \begin{frame}{Agenda}
+    \tableofcontents[#1]
+  \end{frame}%
+}
+
+% Argumente: Folientitel, Dateiname, kurzer Lesehinweis und Quellenhinweis.
+\newcommand{\Grafikfolie}[4]{%
+  \begin{frame}{#1}
+    \begingroup\small\raggedright #3\par\endgroup
+    \vspace{1mm}
+    \centering
+    \includegraphics[width=\linewidth,height=.58\paperheight,keepaspectratio]{#2}\par
+    \note{#4}
+  \end{frame}%
+}
+\newcommand{\QuelleArmut}{Weltbank, Poverty and Inequality Platform. OWID und der Kursdatensatz liefern die verwendeten Armutsreihen.}
+\newcommand{\QuellePIP}{Weltbank, Poverty and Inequality Platform. Eigene Auswertung der nationalen Erhebungen im Kursdatensatz.}
+\newcommand{\QuelleGesundheit}{Weltbank PIP für Armut. UN IGME und Gapminder für Kindersterblichkeit, aufbereitet von Our World in Data.}
+
+\begin{document}
+
+\begin{frame}[c]
+  \begin{center}
+    {\usebeamerfont{title}\inserttitle\par}
+    \vspace{3mm}
+    {\Large\insertsubtitle\par}
+  \end{center}
+  \vspace{7mm}
+  \begin{flushright}
+    \insertauthor\\[2mm]
+    {\small\insertinstitute\\[2mm]\insertdate}
+  \end{flushright}
+\end{frame}
+
+\Agenda
+
+\section{Überblick und Terminologie}
+
+\begin{frame}{Was bedeutet extreme Armut?}
+  \begin{itemize}[<+->]
+    \setlength{\itemsep}{4mm}
+    \item Die Armutsquote misst den Anteil der Menschen, die mit weniger als \textbf{3 internationalen Dollar pro Person und Tag} leben.
+    \item Internationale Dollar berücksichtigen Unterschiede in den Lebenshaltungskosten. Die Grenze bezieht sich auf die Kaufkraft von 2021.
+    \item Je nach Land und Erhebung basiert die Quote auf dem \textbf{Einkommen} oder dem \textbf{Konsum} der Haushalte.
+  \end{itemize}
+  \note{\QuelleArmut}
+\end{frame}
+
+\begin{frame}{Datengrundlage}
+  \begin{itemize}[<+->]
+    \setlength{\itemsep}{4mm}
+    \item \textbf{Welt und Regionen.} Modellierte Armutsquoten für 1990 bis 2024.
+    \item \textbf{Länder.} Beobachtungen aus nationalen Erhebungen. Für die Fallauswahl vergleichen wir Reihen mit derselben Erhebungsart und Vergleichbarkeitskennung.
+    \item \textbf{Kindersterblichkeit.} Todesfälle vor dem fünften Geburtstag je 100 Lebendgeburten. Wir verbinden Armut und Kindersterblichkeit aus demselben Länderjahr.
+  \end{itemize}
+  \note{\QuelleArmut\space\QuelleGesundheit}
+\end{frame}
+
+\section{Datenanalyse}
+\subsection{Entwicklung der Armut}
+\Agenda[currentsection,currentsubsection]
+
+\Grafikfolie
+  {Weltweit sank extreme Armut von 43,4 auf 10,4\,\%}
+  {01_weltweiter_verlauf.png}
+  {Entwicklung der weltweiten Armutsquote von 1990 bis 2024.}
+  {\QuelleArmut}
+
+\Grafikfolie
+  {Subsahara-Afrika hatte 2024 die höchste Armutsquote}
+  {02_regionale_verlaeufe.png}
+  {Offene Kreise zeigen 1990. Gefüllte Kreise zeigen 2024.}
+  {\QuelleArmut\space Die Quote Subsahara-Afrikas lag 2024 bei 45,1 Prozent.}
+
+\Grafikfolie
+  {In Pakistan sank die Armut, in Simbabwe stieg sie}
+  {03_laendervergleich.png}
+  {Veränderung in Prozentpunkten über die jeweils angegebenen Jahre.}
+  {\QuellePIP\space Drei Fälle aus 66 vergleichbaren Länderreihen.}
+
+\Grafikfolie
+  {Simbabwe wich vom Trend in Subsahara-Afrika ab}
+  {04_laender_im_regionalen_vergleich.png}
+  {Rot zeigt nationale Erhebungen. Grau zeigt die modellierte Regionalquote.}
+  {\QuelleArmut\space Der Vergleich umfasst 2011 bis 2019.}
+
+\Grafikfolie
+  {Auch bei höheren Grenzen sank die weltweite Armutsquote}
+  {07_alternative_armutsgrenzen.png}
+  {Drei Armutsgrenzen in internationalen Dollar pro Person und Tag.}
+  {\QuelleArmut\space Die Grenzen liegen bei 3, 4,20 und 8,30 internationalen Dollar.}
+
+\subsection{Einkommen und Konsum}
+\Agenda[currentsection,currentsubsection]
+
+\Grafikfolie
+  {Die Erhebungsart unterscheidet sich nach Region}
+  {05_erhebungsarten.png}
+  {Jüngste verfügbare Erhebung je Land zwischen 2015 und 2024.}
+  {\QuellePIP\space Einkommen überwiegt in Europa und Zentralasien, Konsum in Subsahara-Afrika.}
+
+\Grafikfolie
+  {Mit Einkommensdaten ist die Quote in 18 von 19 Ländern höher}
+  {06_einkommen_konsum_differenzen.png}
+  {Median je Land. Rechts liegt die Quote bei Einkommen höher.}
+  {\QuellePIP\space 88 Land-Jahr-Paare. Bei 18 von 19 Ländern ist der Median der Differenzen positiv. Unterschiede zwischen Befragungen können die Differenzen mit erklären.}
+
+\subsection{Wirtschaft und Gesundheit}
+\Agenda[currentsection,currentsubsection]
+
+\Grafikfolie
+  {Bei höherem BIP pro Kopf ist extreme Armut meist seltener}
+  {08_bip_und_armut.png}
+  {Um 2020. Die Kreisfläche zeigt die Bevölkerung je Land.}
+  {\QuellePIP\space BIP pro Kopf in konstanten US-Dollar von 2015. Die x-Achse ist logarithmisch.}
+
+\Grafikfolie
+  {Mehr Ungleichheit geht häufig mit mehr Armut einher}
+  {09_ungleichheit_und_armut.png}
+  {Ein höherer Gini-Wert bedeutet mehr Ungleichheit.}
+  {\QuellePIP\space Gini und Armutsquote stammen je Land aus derselben Erhebung. Einkommen und Konsum erscheinen in getrennten Feldern.}
+
+\Grafikfolie
+  {Bei höherer Armut ist die Kindersterblichkeit meist höher}
+  {10_kindersterblichkeit_und_armut.png}
+  {Ein Kreis je Land. Beide Werte stammen aus demselben Jahr.}
+  {\QuelleGesundheit\space Die Stichprobe umfasst 129 Länder um 2020.}
+
+\Grafikfolie
+  {In beiden Ländergruppen sank die Kindersterblichkeit}
+  {11_kindersterblichkeit_zeitvergleich.png}
+  {Dieselben 80 Länder, gruppiert nach ihrer Armutsquote um 2000.}
+  {\QuelleGesundheit\space Die Linien verbinden die ungewichteten Ländermediane in drei Zeitfenstern. Die Gruppenzugehörigkeit bleibt für jedes Land gleich.}
+
+\Grafikfolie
+  {In Simbabwe stieg die Armut und die Kindersterblichkeit sank}
+  {12_kindersterblichkeit_fallbeispiele.png}
+  {Dieselben Erhebungsjahre. Jede Messgröße hat ihre eigene Skala.}
+  {\QuelleGesundheit\space Zwischen 2011 und 2019 stieg die Armutsquote von 35,7 auf 49,2 Prozent. Die Kindersterblichkeit fiel von 7,7 auf 5,9 je 100 Lebendgeburten.}
+
+\Grafikfolie
+  {Auch bei 40 Dollar bleibt der Zusammenhang schwach}
+  {13_hoehere_grenze_kindersterblichkeit.png}
+  {Dieselben 26 Länder mit höherem BIP. Die x-Skalen unterscheiden sich.}
+  {\QuelleGesundheit\space Die Gruppe umfasst Länder mit mindestens 20.000 US-Dollar BIP pro Kopf in Preisen von 2015. Andere BIP-Abgrenzungen können zu stärkeren Zusammenhängen führen.}
+
+\section{Zusammenfassung und Diskussion}
+\Agenda[currentsection]
+
+\begin{frame}{Zusammenfassung}
+  \begin{itemize}[<+->]
+    \setlength{\itemsep}{4mm}
+    \item Die weltweite Armutsquote ging zurück. In den Regionen fiel der Rückgang unterschiedlich stark aus.
+    \item In 18 von 19 Ländern mit vergleichbaren Jahreswerten war die Armutsquote mit Einkommensdaten im Median höher.
+    \item Länder mit mehr extremer Armut wiesen häufig eine höhere Kindersterblichkeit auf. Simbabwe zeigt, dass sich beide Größen über die Zeit unterschiedlich entwickeln können.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Diskussion}
+  \begin{itemize}
+    \setlength{\itemsep}{5mm}
+    \item Welche Armutsgrenze ist für den Vergleich welcher Länder aussagekräftig?
+    \item Wie verändern Erhebungsart und fehlende Daten das Bild einer Region?
+    \item Welche Informationen zu Gesundheit und Versorgung würden helfen, den Zusammenhang mit Armut genauer einzuordnen?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Datenquellen}
+  \begin{itemize}
+    \setlength{\itemsep}{4mm}
+    \item \href{https://pip.worldbank.org/}{Weltbank, Poverty and Inequality Platform}. Armutsquoten und nationale Haushaltsbefragungen im Kursdatensatz.
+    \item \href{https://ourworldindata.org/grapher/share-of-population-in-extreme-poverty}{Our World in Data}. Aufbereitete Armutsreihen für Welt und Regionen.
+    \item \href{https://ourworldindata.org/grapher/child-mortality}{UN IGME und Gapminder, aufbereitet von Our World in Data}. Kindersterblichkeit.
+  \end{itemize}
+\end{frame}
+
+\end{document}
