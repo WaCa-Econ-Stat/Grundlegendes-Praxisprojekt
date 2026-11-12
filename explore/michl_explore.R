@@ -9,6 +9,7 @@ countries <- surveys[owid_selected == TRUE]   # one survey per country-year (OWI
 regions   <- aggregates[type == "region"]
 world     <- aggregates[type == "world"]
 
+
 # long format over all poverty lines, e.g. for regions
 regionsLong <- melt(regions, id.vars = c("region_name", "year", "is_projection"),
                     measure.vars = names(povertyLines), variable.name = "line", value.name = "pct")
@@ -30,3 +31,40 @@ p2
 # ---- Example: distance country vs. regional estimate in the same year ----
 countries[regions, on = .(region_name, year), region_pct := i.pct_below_3]
 countries[, diff_pp := pct_below_3 - region_pct]
+
+
+ggplot(data = countries, aes(x = diff_pp, y = region_name)) +
+  geom_boxplot()
+ggplot(data = countries, aes(x = diff_pp, y = region_name)) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey50") +
+  geom_boxplot() +
+  scale_y_discrete(labels = regionLabels) +
+  labs(x = "Land-Jahr minus Regionalschätzung desselben Jahres (pp)", y = NULL, caption = sourcePoverty)
+
+countryDiff <- countries[, .(mean_diff_pp = mean(diff_pp, na.rm = TRUE)), by = .(country_code, region_name)]
+ggplot(countryDiff[!is.nan(mean_diff_pp)], aes(x = mean_diff_pp, y = region_name)) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey50") +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(height = 0.15, width = 0, size = 1, alpha = 0.5) +
+  scale_y_discrete(labels = regionLabels) +
+  labs(x = "Mittel über Survey-Jahre: Land minus Regionalschätzung (pp)", y = NULL,
+       caption = sourcePoverty)
+
+
+both <- rbind(
+  countries[!is.na(diff_pp), .(region_name, diff = diff_pp, level = "Land-Jahr")],
+  countryDiff[!is.nan(mean_diff_pp), .(region_name, diff = mean_diff_pp, level = "Land (Mittel über Survey-Jahre)")]
+)
+both[, level := factor(level, levels = unique(level))]
+
+ggplot(both, aes(x = diff, y = region_name)) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey50") +
+  geom_boxplot() +
+  facet_wrap(~ level, ncol = 2) +          # ncol = 1 -> übereinander
+  scale_y_discrete(labels = regionLabels) +
+  labs(x = "Land minus Regionalschätzung desselben Jahres (pp)", y = NULL, caption = sourcePoverty)
+
+#
+
+
+
