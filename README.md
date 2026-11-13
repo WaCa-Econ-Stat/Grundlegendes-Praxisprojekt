@@ -14,6 +14,8 @@ renv::restore()        # once
 source("run_all.R")    # raw data -> data_clean/ -> output/figures/
 ```
 Working directory = project root (open the RStudio project). All paths are relative to it.
+Tested with R 4.5 (`renv.lock` was created with R 4.5.1); with a different R version `renv::restore()` may
+need to compile packages from source.
 
 ## Layout
 ```
@@ -42,7 +44,8 @@ report/              later: LaTeX beamer or Quarto slides (format not decided ye
 4. **The output folder is the interface to the report.** `saveFigure(p, name)` writes PDF and PNG at
    the final size (default 14 × 7 cm ≈ text width of a 16:9 beamer slide). Include the figures unscaled,
    so the font size in the figure equals `base_size` (11 pt). This keeps LaTeX and Quarto both possible.
-   The PDF uses `encoding = "WinAnsi"` so that umlauts, en dash and € render on all OS.
+   The PDF uses the base `pdf` device with `encoding = "WinAnsi"` so that umlauts, en dash and € render
+   on all OS. With `cairo_pdf`, or if Quarto renders figures itself, encoding handling differs: check umlauts.
 5. **Data prep produces base data only.** No plot-specific tables in `01_data_prep.R`. Subsets and
    derived tables live in the figure or exploration scripts, so dropping a plot leaves no dead code
    in the data layer.
@@ -97,6 +100,11 @@ countries[regions, on = .(region_name, year), region_pct := i.pct_below_3]
 - Comments in English; all text in plots in German
 - data.table for data, ggplot2 for plots; `library()` directly; no `return()` at the end of functions
 - Figure scripts start with `source("R/00_setup.R")` plus `readRDS()` and end with `saveFigure()` calls
+- Figure scripts are independent: each uses only `R/00_setup.R` and `data_clean/`, never objects or files
+  from another fig script, and does not overwrite setup objects (`regionLabels` etc.); for a local variant
+  use a new name. `run_all.R` runs them in alphabetical order, each in its own environment.
+- Setup objects (labels, colours, `saveFigure()`) live in the global environment by design. Disable
+  "Restore .RData into workspace at startup" in RStudio, so scripts never rely on leftovers from old sessions.
 
 ## Interpretation caveats
 - Country values exist only for survey years. Regional and world values are modelled

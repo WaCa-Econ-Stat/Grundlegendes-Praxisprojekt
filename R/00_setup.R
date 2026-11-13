@@ -4,6 +4,7 @@
 # scales or colours (the later layer wins).
 library(data.table)
 library(ggplot2)
+# scales is used only via scales:: (not attached); it is in renv.lock as a ggplot2 dependency
 
 # ---- Global theme ----
 theme_set(
@@ -75,7 +76,9 @@ figHeight <- 7    # cm
 saveFigure <- function(p, name, width = figWidth, height = figHeight, dir = "output/figures") {
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
   file <- file.path(dir, name)
-  # WinAnsi: umlauts, en dash and euro sign render with the base pdf device on all OS
+  # WinAnsi: umlauts, en dash and euro sign render with the base pdf device on all OS.
+  # encoding applies only to device = "pdf"; with cairo_pdf (or figures rendered by Quarto
+  # itself) font/encoding handling differs, so check umlauts if you switch.
   ggsave(paste0(file, ".pdf"), p, width = width, height = height, units = "cm",
          device = "pdf", encoding = "WinAnsi")
   ggsave(paste0(file, ".png"), p, width = width, height = height, units = "cm",

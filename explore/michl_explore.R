@@ -1,6 +1,7 @@
 # ---- Exploration (interactive, not part of run_all.R) ----
 source("R/00_setup.R")
-surveys    <- readRDS("data_clean/surveys.rds")
+
+surveys    <- fread("data_clean/surveys.rds")
 aggregates <- readRDS("data_clean/aggregates.rds")
 china      <- readRDS("data_clean/china.rds")
 
@@ -8,7 +9,7 @@ china      <- readRDS("data_clean/china.rds")
 countries <- surveys[owid_selected == TRUE]   # one survey per country-year (OWID choice)
 regions   <- aggregates[type == "region"]
 world     <- aggregates[type == "world"]
-
+surveys$owid_selected
 
 # long format over all poverty lines, e.g. for regions
 regionsLong <- melt(regions, id.vars = c("region_name", "year", "is_projection"),
@@ -65,6 +66,32 @@ ggplot(both, aes(x = diff, y = region_name)) +
   labs(x = "Land minus Regionalschätzung desselben Jahres (pp)", y = NULL, caption = sourcePoverty)
 
 #
+############################
 
 
+ggplot(regions[year >= 1990], aes(year, pct_below_3)) +
+  geom_line(aes(group = region_name), colour = "grey75")
+ggplot(regions[year >= 1990], aes(year, pct_below_10)) +
+  geom_line(aes(group = region_name), colour = "grey75")
+
+
+ggplot(regions[year >= 1990], aes(year, pct_below_3)) +
+  geom_line(aes(group = region_name), colour = "grey75") +
+  geom_line(aes(y = pct_below_10, group = region_name, colour = "10 $/Tag")) +
+  geom_line(aes(y = pct_below_40, group = region_name, colour = "40 $/Tag")) +
+  scale_colour_manual(values = c("10 $/Tag" = "#E69F00", "40 $/Tag" = "#0072B2")) +
+  facet_wrap(~ region_name, ncol = 4, labeller = as_labeller(regionLabels)) +
+  labs(colour = NULL)
+
+lineCols   <- c(pct_below_3 = "< 3 $/Tag", pct_below_10 = "< 10 $/Tag", pct_below_40 = "< 40 $/Tag")
+regionsSel <- melt(regions[year >= 1990], id.vars = c("region_name", "year"),
+                   measure.vars = names(lineCols), variable.name = "line", value.name = "pct")
+regionsSel[, line := factor(lineCols[as.character(line)], levels = lineCols)]
+
+ggplot(regionsSel, aes(year, pct, colour = region_name)) +
+  geom_line() +
+  facet_wrap(~ line, nrow = 1) +
+  scale_colour_manual(values = regionColors, labels = regionLabels, breaks = names(regionLabels)) +
+  scale_y_continuous(labels = labelPct, limits = c(0, 100)) +
+  labs(x = NULL, y = "Anteil unter Armutsgrenze", colour = NULL, caption = sourcePoverty)
 
